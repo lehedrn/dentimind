@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>外呼管理 - 口腔医院AI客服</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 20px 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            margin-bottom: 20px;
+        }
+
+        .card h2 {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .call-form {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .call-form input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .call-form input:focus {
+            border-color: #667eea;
+        }
+
+        .call-form button {
+            padding: 12px 32px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .call-form button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .call-form button:active {
+            transform: translateY(0);
+        }
+
+        .call-form button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .alert {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            display: none;
+        }
+
+        .alert.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .alert.show {
+            display: block;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #333;
+        }
+
+        td {
+            color: #666;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status.completed {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status.no_answer {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status.busy {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .status.failed {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        audio {
+            height: 32px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        .refresh-btn {
+            padding: 8px 16px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            float: right;
+        }
+
+        .refresh-btn:hover {
+            background: #5568d3;
+        }
+
+        @media (max-width: 768px) {
+            .call-form {
+                flex-direction: column;
+            }
+
+            .call-form input,
+            .call-form button {
+                width: 100%;
+            }
+
+            table {
+                font-size: 14px;
+            }
+
+            th, td {
+                padding: 8px;
+            }
+        }
+
+        /* Toast 通知样式 */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .toast {
+            background: white;
+            padding: 16px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            min-width: 300px;
+            display: flex;
+            align-items: center;
+            animation: slideIn 0.3s ease-out;
+            border-left: 4px solid #667eea;
+        }
+
+        .toast.success {
+            border-left-color: #4caf50;
+        }
+
+        .toast.error {
+            border-left-color: #f44336;
+        }
+
+        .toast.warning {
+            border-left-color: #ff9800;
+        }
+
+        .toast.info {
+            border-left-color: #2196f3;
+        }
+
+        .toast-icon {
+            font-size: 20px;
+            margin-right: 12px;
+        }
+
+        .toast.success .toast-icon {
+            color: #4caf50;
+        }
+
+        .toast.error .toast-icon {
+            color: #f44336;
+        }
+
+        .toast.warning .toast-icon {
+            color: #ff9800;
+        }
+
+        .toast.info .toast-icon {
+            color: #2196f3;
+        }
+
+        .toast-message {
+            flex: 1;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .toast-close {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: #999;
+            padding: 0;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .toast-close:hover {
+            color: #333;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+        }
+
+        .toast.hiding {
+            animation: slideOut 0.3s ease-out;
+        }
+
+        /* 网络错误提示 */
+        .network-error {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: #f44336;
+            color: white;
+            padding: 12px 20px;
+            text-align: center;
+            font-size: 14px;
+            z-index: 9999;
+            display: none;
+        }
+
+        .network-error.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 网络错误提示 -->
+        <div id="network-error" class="network-error">
+            ⚠️ 网络连接已断开，请检查网络设置
+        </div>
+
+        <!-- Toast 通知容器 -->
+        <div id="toast-container" class="toast-container"></div>
+
+        <div class="header">
+            <h1>外呼管理</h1>
+            <p>AI智能外呼，自动回访客户</p>
+        </div>
+
+        <div class="card">
+            <h2>发起外呼</h2>
+            <div id="alert" class="alert"></div>
+            <div class="call-form">
+                <input type="tel" id="phone-number" placeholder="请输入客户手机号（11位）" maxlength="11">
+                <button onclick="makeCall()" id="call-btn">拨打</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>
+                通话记录
+                <button class="refresh-btn" onclick="loadCallRecords()">刷新</button>
+            </h2>
+            <table id="call-records">
+                <thead>
+                    <tr>
+                        <th>号码</th>
+                        <th>类型</th>
+                        <th>状态</th>
+                        <th>时长</th>
+                        <th>时间</th>
+                        <th>录音</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td colspan="6" class="empty-state">加载中...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = window.location.origin;
+
+        // ===== Toast 通知系统 =====
+        function showToast(message, type = 'info', duration = 3000) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+
+            const icons = {
+                success: '✅',
+                error: '❌',
+                warning: '⚠️',
+                info: 'ℹ️'
+            };
+
+            toast.innerHTML = `
+                <span class="toast-icon">${icons[type] || icons.info}</span>
+                <span class="toast-message">${message}</span>
+                <button class="toast-close" onclick="closeToast(this.parentElement)">&times;</button>
+            `;
+
+            container.appendChild(toast);
+
+            // 自动关闭
+            setTimeout(() => {
+                closeToast(toast);
+            }, duration);
+        }
+
+        function closeToast(toast) {
+            if (!toast || !toast.parentElement) return;
+            toast.classList.add('hiding');
+            setTimeout(() => {
+                if (toast.parentElement) {
+                    toast.parentElement.removeChild(toast);
+                }
+            }, 300);
+        }
+
+        // ===== 网络错误检测 =====
+        function checkNetworkStatus() {
+            const networkError = document.getElementById('network-error');
+            if (!navigator.onLine) {
+                networkError.classList.add('show');
+            } else {
+                networkError.classList.remove('show');
+            }
+        }
+
+        window.addEventListener('online', () => {
+            document.getElementById('network-error').classList.remove('show');
+            showToast('网络已恢复', 'success');
+            loadCallRecords(); // 重新加载数据
+        });
+
+        window.addEventListener('offline', () => {
+            document.getElementById('network-error').classList.add('show');
+            showToast('网络连接已断开', 'error');
+        });
+
+        // 通用的 fetch 封装
+        async function safeFetch(url, options = {}) {
+            if (!navigator.onLine) {
+                showToast('网络连接已断开，请检查网络', 'error');
+                throw new Error('网络已断开');
+            }
+
+            try {
+                const response = await fetch(url, options);
+
+                if (!response.ok) {
+                    const errorText = await response.text().catch(() => '未知错误');
+                    let errorMsg = `请求失败 (${response.status})`;
+                    try {
+                        const errorJson = JSON.parse(errorText);
+                        if (errorJson.detail) {
+                            errorMsg = errorJson.detail;
+                        }
+                    } catch (e) {
+                        // 忽略 JSON 解析错误
+                    }
+                    throw new Error(errorMsg);
+                }
+
+                return response;
+            } catch (error) {
+                if (error.name === 'TypeError' && error.message.includes('fetch')) {
+                    showToast('网络连接失败，请检查网络设置', 'error');
+                }
+                throw error;
+            }
+        }
+
+        async function makeCall() {
+            const phoneInput = document.getElementById('phone-number');
+            const callBtn = document.getElementById('call-btn');
+            const phone = phoneInput.value.trim();
+
+            if (!phone) {
+                showToast('请输入手机号', 'warning');
+                return;
+            }
+
+            if (!/^\d{11}$/.test(phone)) {
+                showToast('请输入正确的11位手机号', 'warning');
+                return;
+            }
+
+            callBtn.disabled = true;
+            callBtn.textContent = '拨打中...';
+
+            try {
+                const response = await safeFetch(`${API_BASE}/api/ccc/outbound-call?callee_number=${phone}`, {
+                    method: 'POST'
+                });
+
+                const result = await response.json();
+
+                showToast(`外呼已发起！通话ID: ${result.call_id}`, 'success');
+                phoneInput.value = '';
+
+                // 刷新通话记录
+                setTimeout(() => loadCallRecords(), 2000);
+
+            } catch (error) {
+                console.error('外呼失败:', error);
+                showToast(`外呼失败: ${error.message}`, 'error');
+            } finally {
+                callBtn.disabled = false;
+                callBtn.textContent = '拨打';
+            }
+        }
+
+        async function loadCallRecords() {
+            const endTime = Date.now();
+            const startTime = endTime - 7 * 24 * 60 * 60 * 1000;  // 最近7天
+
+            try {
+                const response = await safeFetch(`${API_BASE}/api/ccc/call-records?start_time=${startTime}&end_time=${endTime}`);
+                const data = await response.json();
+                const tbody = document.querySelector('#call-records tbody');
+
+                if (!data.records || data.records.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" class="empty-state">📞 暂无通话记录，发起外呼后将在这里显示</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = '';
+
+                data.records.forEach(record => {
+                    const row = tbody.insertRow();
+                    // CCC API返回的字段（下划线命名）：called_number, calling_number, contact_type, contact_disposition, call_duration, start_time, recording_ready, contact_id
+                    const phoneNumber = record.called_number || record.calling_number || '-';
+                    const callType = record.contact_type === 'Outbound' ? '外呼' : '呼入';
+                    const status = record.contact_disposition || 'Unknown';
+                    const duration = record.call_duration || 0;
+                    const startTime = record.start_time || null;
+                    const hasRecording = record.recording_ready || false;
+                    const contactId = record.contact_id || '';
+
+                    // 如果有录音，直接显示audio播放器
+                    let recordingHtml = '-';
+                    if (hasRecording && contactId) {
+                        recordingHtml = `<audio controls preload="none" src="${API_BASE}/api/ccc/recording/${contactId}">您的浏览器不支持audio元素</audio>`;
+                    }
+
+                    row.innerHTML = `
+                        <td>${phoneNumber}</td>
+                        <td>${callType}</td>
+                        <td><span class="status ${mapStatusClass(status)}">${formatStatus(status)}</span></td>
+                        <td>${formatDuration(duration)}</td>
+                        <td>${formatTime(startTime)}</td>
+                        <td>${recordingHtml}</td>
+                    `;
+                });
+
+            } catch (error) {
+                console.error('加载通话记录失败:', error);
+                const tbody = document.querySelector('#call-records tbody');
+                tbody.innerHTML = '<tr><td colspan="6" class="empty-state">❌ 加载失败，请刷新重试</td></tr>';
+                showToast('加载通话记录失败: ' + error.message, 'error');
+            }
+        }
+
+        // 播放录音
+        async function playRecording(contactId, button) {
+            try {
+                button.textContent = '加载中...';
+                button.disabled = true;
+
+                console.log('正在获取录音URL:', contactId);
+
+                const response = await safeFetch(`${API_BASE}/api/ccc/recording/${contactId}`);
+                const data = await response.json();
+                console.log('获取到录音数据:', data);
+
+                if (data.recording_url) {
+                    // 找到同行的audio元素
+                    const row = button.closest('tr');
+                    const audio = row.querySelector('audio');
+
+                    if (audio) {
+                        audio.src = data.recording_url;
+                        audio.style.display = 'block';
+                        button.style.display = 'none';
+
+                        console.log('录音URL已设置:', data.recording_url);
+
+                        // 自动播放
+                        audio.play();
+                    }
+                } else {
+                    throw new Error('响应中没有recording_url');
+                }
+            } catch (error) {
+                console.error('加载录音失败:', error);
+                showToast('加载录音失败: ' + error.message, 'error');
+                button.textContent = '加载录音';
+                button.disabled = false;
+            }
+        }
+
+        // 动态加载录音URL
+        async function loadRecordingUrl(audioElement, contactId) {
+            if (!audioElement.src || audioElement.src === window.location.href) {
+                try {
+                    const response = await fetch(`${API_BASE}/api/ccc/recording/${contactId}`);
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.recording_url) {
+                            audioElement.src = data.recording_url;
+                            console.log('录音URL已加载:', data.recording_url);
+                        }
+                    } else {
+                        console.error('获取录音URL失败:', response.status);
+                    }
+                } catch (error) {
+                    console.error('获取录音URL异常:', error);
+                }
+            }
+        }
+
+        function formatStatus(status) {
+            const statusMap = {
+                'Success': '已成功',
+                'NoAnswer': '未接听',
+                'Busy': '忙线',
+                'Failed': '失败',
+                'Initiated': '已发起',
+                'Cancelled': '已取消',
+                'AbandonedInRing': '响铃中挂断',
+                'AbandonedInQueue': '排队中挂断',
+                'Talked': '已通话',
+                'Voicemail': '语音留言',
+                'SystemError': '系统错误',
+                'NotApplicable': '不适用'
+            };
+            return statusMap[status] || status;
+        }
+
+        function mapStatusClass(status) {
+            const classMap = {
+                'Success': 'completed',
+                'Talked': 'completed',
+                'NoAnswer': 'no_answer',
+                'Busy': 'busy',
+                'Failed': 'failed',
+                'Cancelled': 'failed',
+                'AbandonedInRing': 'no_answer',
+                'AbandonedInQueue': 'no_answer',
+                'SystemError': 'failed',
+                'Voicemail': 'completed',
+                'Initiated': 'initiated',
+                'NotApplicable': ''
+            };
+            return classMap[status] || '';
+        }
+
+        function formatDuration(seconds) {
+            if (!seconds || seconds === 0) return '-';
+            const min = Math.floor(seconds / 60);
+            const sec = seconds % 60;
+            return min > 0 ? `${min}分${sec}秒` : `${sec}秒`;
+        }
+
+        function formatTime(timestamp) {
+            if (!timestamp) return '-';
+            const date = new Date(typeof timestamp === 'number' && timestamp > 10000000000 ? timestamp : timestamp * 1000);
+            return date.toLocaleString('zh-CN');
+        }
+
+        function showAlert(message, type) {
+            const alert = document.getElementById('alert');
+            alert.textContent = message;
+            alert.className = `alert ${type} show`;
+
+            setTimeout(() => {
+                alert.className = 'alert';
+            }, 5000);
+        }
+
+        // 页面加载时获取通话记录
+        window.onload = () => {
+            checkNetworkStatus();
+            loadCallRecords();
+        };
+
+        // 回车键触发拨打
+        document.getElementById('phone-number').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                makeCall();
+            }
+        });
+    </script>
+</body>
+</html>

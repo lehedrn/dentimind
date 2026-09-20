@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>在线咨询 - 口腔医院AI客服</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        #chat-container {
+            width: 100%;
+            max-width: 600px;
+            height: 80vh;
+            max-height: 700px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        #chat-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        #chat-header h3 {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        #chat-header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        #messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+
+        .message {
+            margin: 12px 0;
+            padding: 12px 16px;
+            border-radius: 12px;
+            max-width: 80%;
+            word-wrap: break-word;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.user {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            margin-left: auto;
+            border-bottom-right-radius: 4px;
+        }
+
+        .message.bot {
+            background: white;
+            color: #333;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border-bottom-left-radius: 4px;
+        }
+
+        .message.loading {
+            background: white;
+            color: #999;
+            font-style: italic;
+        }
+
+        #input-area {
+            display: flex;
+            padding: 15px;
+            background: white;
+            border-top: 1px solid #e9ecef;
+            gap: 10px;
+        }
+
+        #user-input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #e9ecef;
+            border-radius: 24px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        #user-input:focus {
+            border-color: #667eea;
+        }
+
+        #send-btn {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 24px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        #send-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        #send-btn:active {
+            transform: translateY(0);
+        }
+
+        #send-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* Loading动画样式 */
+        .loading-dots {
+            font-style: italic;
+            color: #666;
+            display: inline-block;
+        }
+
+        .loading-dots::after {
+            content: '';
+            animation: dots 1s steps(4, end) infinite;
+        }
+
+        @keyframes dots {
+            0% { content: ''; }
+            25% { content: '.'; }
+            50% { content: '..'; }
+            75% { content: '...'; }
+            100% { content: ''; }
+        }
+
+        /* 添加脉冲动画 */
+        .message.loading {
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        /* 滚动条样式 */
+        #messages::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        #messages::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        #messages::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 3px;
+        }
+
+        #messages::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            body {
+                padding: 0;
+            }
+
+            #chat-container {
+                height: 100vh;
+                max-height: none;
+                border-radius: 0;
+            }
+
+            .message {
+                max-width: 85%;
+            }
+        }
+
+        /* Toast 通知样式 */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .toast {
+            background: white;
+            padding: 16px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            min-width: 300px;
+            display: flex;
+            align-items: center;
+            animation: slideIn 0.3s ease-out;
+            border-left: 4px solid #667eea;
+        }
+
+        .toast.success {
+            border-left-color: #4caf50;
+        }
+
+        .toast.error {
+            border-left-color: #f44336;
+        }
+
+        .toast.warning {
+            border-left-color: #ff9800;
+        }
+
+        .toast.info {
+            border-left-color: #2196f3;
+        }
+
+        .toast-icon {
+            font-size: 20px;
+            margin-right: 12px;
+        }
+
+        .toast.success .toast-icon {
+            color: #4caf50;
+        }
+
+        .toast.error .toast-icon {
+            color: #f44336;
+        }
+
+        .toast.warning .toast-icon {
+            color: #ff9800;
+        }
+
+        .toast.info .toast-icon {
+            color: #2196f3;
+        }
+
+        .toast-message {
+            flex: 1;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .toast-close {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: #999;
+            padding: 0;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .toast-close:hover {
+            color: #333;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+        }
+
+        .toast.hiding {
+            animation: slideOut 0.3s ease-out;
+        }
+
+        /* 网络错误提示 */
+        .network-error {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: #f44336;
+            color: white;
+            padding: 12px 20px;
+            text-align: center;
+            font-size: 14px;
+            z-index: 9999;
+            display: none;
+        }
+
+        .network-error.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <!-- 网络错误提示 -->
+    <div id="network-error" class="network-error">
+        ⚠️ 网络连接已断开，请检查网络设置
+    </div>
+
+    <!-- Toast 通知容器 -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <div id="chat-container">
+        <div id="chat-header">
+            <h3>口腔医院 - 在线咨询</h3>
+            <p>AI客服小雅为您服务</p>
+        </div>
+        <div id="messages"></div>
+        <div id="input-area">
+            <input type="text" id="user-input" placeholder="输入您的问题..." onkeypress="handleKeyPress(event)">
+            <button id="send-btn" onclick="sendMessage()">发送</button>
+        </div>
+    </div>
+
+    <script>
+        let sessionId = 'session-' + Date.now();
+        const API_BASE = window.location.origin;
+
+        // ===== Toast 通知系统 =====
+        function showToast(message, type = 'info', duration = 3000) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+
+            const icons = {
+                success: '✅',
+                error: '❌',
+                warning: '⚠️',
+                info: 'ℹ️'
+            };
+
+            toast.innerHTML = `
+                <span class="toast-icon">${icons[type] || icons.info}</span>
+                <span class="toast-message">${message}</span>
+                <button class="toast-close" onclick="closeToast(this.parentElement)">&times;</button>
+            `;
+
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                closeToast(toast);
+            }, duration);
+        }
+
+        function closeToast(toast) {
+            if (!toast || !toast.parentElement) return;
+            toast.classList.add('hiding');
+            setTimeout(() => {
+                if (toast.parentElement) {
+                    toast.parentElement.removeChild(toast);
+                }
+            }, 300);
+        }
+
+        // ===== 网络错误检测 =====
+        function checkNetworkStatus() {
+            const networkError = document.getElementById('network-error');
+            if (!navigator.onLine) {
+                networkError.classList.add('show');
+            } else {
+                networkError.classList.remove('show');
+            }
+        }
+
+        window.addEventListener('online', () => {
+            document.getElementById('network-error').classList.remove('show');
+            showToast('网络已恢复', 'success');
+        });
+
+        window.addEventListener('offline', () => {
+            document.getElementById('network-error').classList.add('show');
+            showToast('网络连接已断开', 'error');
+        });
+
+        // 通用的 fetch 封装
+        async function safeFetch(url, options = {}) {
+            if (!navigator.onLine) {
+                showToast('网络连接已断开，请检查网络', 'error');
+                throw new Error('网络已断开');
+            }
+
+            try {
+                const response = await fetch(url, options);
+
+                if (!response.ok) {
+                    const errorText = await response.text().catch(() => '未知错误');
+                    let errorMsg = `请求失败 (${response.status})`;
+                    try {
+                        const errorJson = JSON.parse(errorText);
+                        if (errorJson.detail) {
+                            errorMsg = errorJson.detail;
+                        }
+                    } catch (e) {
+                        // 忽略 JSON 解析错误
+                    }
+                    throw new Error(errorMsg);
+                }
+
+                return response;
+            } catch (error) {
+                if (error.name === 'TypeError' && error.message.includes('fetch')) {
+                    showToast('网络连接失败，请检查网络设置', 'error');
+                }
+                throw error;
+            }
+        }
+
+        // 显示欢迎消息
+        window.onload = function() {
+            checkNetworkStatus();
+            appendMessage('bot', '您好，这里是口腔医院，我是AI客服小雅，请问有什么可以帮您？');
+            document.getElementById('user-input').focus();
+        };
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('user-input');
+            const sendBtn = document.getElementById('send-btn');
+            const message = input.value.trim();
+
+            if (!message) {
+                showToast('请输入消息内容', 'warning');
+                return;
+            }
+
+            // 清空输入框
+            input.value = '';
+            input.disabled = true;
+            sendBtn.disabled = true;
+
+            // 显示用户消息
+            appendMessage('user', message);
+
+            // 显示动态加载状态
+            const loadingId = appendMessage('bot', '正在思考中', true, true);
+
+            try {
+                const response = await safeFetch(`${API_BASE}/api/chat/message`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        session_id: sessionId,
+                        message: message
+                    })
+                });
+
+                const data = await response.json();
+
+                // 移除加载消息
+                removeMessage(loadingId);
+
+                // 显示AI回复
+                appendMessage('bot', data.reply);
+
+                // 更新session_id
+                sessionId = data.session_id;
+
+            } catch (error) {
+                console.error('发送消息失败:', error);
+                removeMessage(loadingId);
+                const errorMsg = error.message.includes('网络')
+                    ? '网络连接失败，请检查网络后重试'
+                    : '抱歉，系统暂时出现问题，请稍后再试。';
+                appendMessage('bot', errorMsg);
+                showToast('消息发送失败', 'error');
+            } finally {
+                input.disabled = false;
+                sendBtn.disabled = false;
+                input.focus();
+            }
+        }
+
+        function appendMessage(sender, text, isLoading = false, isAnimated = false) {
+            const messages = document.getElementById('messages');
+            const div = document.createElement('div');
+            const msgId = 'msg-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+
+            div.id = msgId;
+            div.className = `message ${sender}${isLoading ? ' loading' : ''}`;
+
+            if (isAnimated) {
+                // 动态loading效果
+                div.innerHTML = '<span class="loading-dots">正在思考中</span>';
+                let dots = 0;
+                div._animationInterval = setInterval(() => {
+                    dots = (dots + 1) % 4;
+                    const dotText = '.'.repeat(dots);
+                    div.innerHTML = `<span class="loading-dots">正在思考中${dotText}</span>`;
+                }, 500);
+            } else {
+                div.textContent = text;
+            }
+
+            messages.appendChild(div);
+            messages.scrollTop = messages.scrollHeight;
+
+            return msgId;
+        }
+
+        function removeMessage(msgId) {
+            const msg = document.getElementById(msgId);
+            if (msg) {
+                // 清除动画定时器
+                if (msg._animationInterval) {
+                    clearInterval(msg._animationInterval);
+                }
+                msg.remove();
+            }
+        }
+    </script>
+</body>
+</html>

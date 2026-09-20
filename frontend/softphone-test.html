@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SDK 3.8.1 测试</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', monospace; background: #1e1e1e; color: #d4d4d4; padding: 20px; }
+        h1 { color: #6fb3d2; margin-bottom: 16px; font-size: 20px; }
+        .bar { display: flex; gap: 10px; align-items: center; margin-bottom: 16px; }
+        .status { padding: 8px 16px; background: #252526; border-radius: 4px; font-size: 14px; flex: 1; }
+        .status .code { color: #e5c07b; font-weight: bold; font-size: 16px; }
+        button { padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; color: white; }
+        .btn-reg { background: #0e639c; }
+        .btn-out { background: #c72e2e; }
+        .btn-force { background: #d1691a; }
+        button:disabled { opacity: 0.4; cursor: not-allowed; }
+        #log { background: #252526; border: 1px solid #333; border-radius: 4px; padding: 12px; height: calc(100vh - 120px); overflow-y: auto; font-size: 12px; line-height: 1.8; }
+        .e { color: #f48771; }
+        .s { color: #89d185; }
+        .w { color: #e5c07b; }
+        .i { color: #6fb3d2; }
+        .d { color: #c586c0; }
+    </style>
+</head>
+<body>
+    <h1>🔧 SDK 3.8.1 测试</h1>
+    <div class="bar">
+        <div class="status" id="status">状态码: <span class="code">-</span></div>
+        <button class="btn-reg" id="btn-reg" onclick="doReg()" disabled>注册/上线</button>
+        <button class="btn-force" id="btn-force" onclick="doForce()" disabled>强制注册</button>
+        <button class="btn-out" id="btn-out" onclick="doOut()" disabled>下线</button>
+    </div>
+    <div id="log"></div>
+
+    <script src="https://g.alicdn.com/cloudcallcenter/web-workbench-sdk/3.8.1/core.min.js"></script>
+    <script>
+        let sdk = null;
+        const $ = id => document.getElementById(id);
+        const log = (m, t='i') => { const d=document.createElement('div'); d.className=t; d.textContent=`[${new Date().toLocaleTimeString()}] ${m}`; $('log').appendChild(d); $('log').scrollTop=1e9; };
+        const status = (c, l) => $('status').innerHTML = `状态码: <span class="code">${c}</span> (${l})`;
+
+        function init() {
+            log('检查 SDK...', 'i');
+            if (!window.CCCWorkbenchSDK) {
+                log('✗ SDK 未加载！检查网络或 CDN', 'e');
+                $('btn-reg').disabled = false;
+                return;
+            }
+            log('✓ SDK 已加载', 's');
+
+            log('初始化 SDK...', 'i');
+            try {
+                sdk = new window.CCCWorkbenchSDK({
+                instanceId: 'demo-1767693362317534',
+                regionId: 'cn-shanghai',
+                ajaxPath: '/api/ccc-proxy',
+                afterCallRule: 15,
+                autoAnswerCall: 0,
+                exportErrorOfApi: true,
+
+                onInit() {
+                    log('✓ SDK 初始化完成', 's');
+                    status(-1, '未注册');
+                    $('btn-reg').disabled = false;
+                    log('点击「注册/上线」开始', 'i');
+                },
+                onRegister(e) { log('✓ SIP 注册成功', 's'); },
+                onLogIn(e) {
+                    log('✓ 登录成功', 's');
+                    status(3, '空闲');
+                    $('btn-reg').disabled = true;
+                    $('btn-out').disabled = false;
+                    $('btn-force').disabled = true;
+                },
+                onReady() { log('✓ 空闲（可接听）', 's'); status(3, '空闲'); },
+                onBreak(e) { log('小休', 'w'); status(2, '小休'); },
+                onLogOut() {
+                    log('已登出', 'i');
+                    status(1, '离线');
+                    $('btn-reg').disabled = false;
+                    $('btn-out').disabled = true;
+                    $('btn-force').disabled = true;
+                },
+                onCallComing(e) {
+                    log(`✓ 来电: ${e.caller || '未知'}`, 's');
+                    status(6, '来电振铃');
+                },
+                onCallDialing(e) { log('拨号中', 'i'); status(8, '拨号'); },
+                onCallEstablish(e) { log('✓ 通话接通', 's'); status(9, '通话中'); },
+                onCallRelease(e) { log('✓ 通话结束', 'i'); status(5, '话后处理'); },
+                onStatusChange(e) { log(`状态: ${e.lastCode} → ${e.code}`, 'i'); status(e.code, `状态${e.code}`); },
+                onBeforeCallDialing(p) { p.callback && p.callback(); },
+                onBeforeCallHangup(p) { p.callback && p.callback(); },
+                onHangUp(t) { log('挂机: ' + t, 'i'); },
+                onErrorNotify(e) {
+                    log(`✗ 错误 ${e.errorCode}: ${e.errorMsgTip || e.errorMsg}`, 'e');
+                    if (e.errorCode === 7001) $('btn-force').disabled = false;
+                },
+            });
+            log('✓ SDK 实例已创建', 's');
+            } catch (e) {
+                log('✗ SDK 初始化失败: ' + e.message, 'e');
+                console.error(e);
+                $('btn-reg').disabled = false;
+            }
+        }
+
+        async function doReg() {
+            if (!sdk) return;
+            $('btn-reg').disabled = true;
+            status(0, '注册中...');
+            try {
+                const g = sdk.getSkillGroups();
+                const all = g.allSkillGroupList || [];
+                log(`技能组: ${all.length} 个`, 'i');
+                all.forEach((s, i) => log(`  [${i}] ${s.skillGroupName} (${s.mediaType}) - ${s.skillGroupId}`, 'd'));
+                await sdk.register({ currentSkillGroups: all });
+                log('✓ register 成功', 's');
+            } catch (e) {
+                log('✗ register 失败: ' + e.message, 'e');
+                log('错误堆栈:', 'e');
+                log(e.stack || '无堆栈信息', 'e');
+                log('错误对象:', 'e');
+                log(JSON.stringify(e, Object.getOwnPropertyNames(e)), 'e');
+                status(-1, '注册失败');
+                $('btn-reg').disabled = false;
+            }
+        }
+
+        async function doForce() {
+            if (!sdk) return;
+            try {
+                log('强制注册...', 'w');
+                await sdk.forceToPrepareSignIn();
+                log('✓ 强制注册成功', 's');
+                $('btn-force').disabled = true;
+            } catch (e) { log('✗ 强制注册失败: ' + e.message, 'e'); }
+        }
+
+        async function doOut() {
+            if (!sdk) return;
+            try {
+                log('下线...', 'i');
+                await sdk.logOut();
+                log('✓ 下线成功', 's');
+            } catch (e) { log('✗ 下线失败: ' + e.message, 'e'); }
+        }
+
+        init();
+
+        // 兜底：3秒后如果按钮还是禁用，强制启用
+        setTimeout(() => {
+            if ($('btn-reg').disabled) {
+                log('⚠ 3秒超时，强制启用按钮', 'w');
+                $('btn-reg').disabled = false;
+            }
+        }, 3000);
+    </script>
+</body>
+</html>

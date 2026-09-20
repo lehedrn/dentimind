@@ -1,0 +1,6 @@
+CCC_INSTANCE_ID: demo-1767693362317534
+白名单只有一个号码: 13950481396
+BAILIAN_APP_ID: aid-66d367c6f194437b9a062f2d77afa371
+DASHSCOPE_API_KEY: your-dashscope-api-key
+AccessKeyId: your-access-key-id
+AccessKeySecret: your-access-key-secret

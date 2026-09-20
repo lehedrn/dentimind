@@ -1,0 +1,1195 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>客户管理 - 口腔医院AI客服</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 20px 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            margin-bottom: 20px;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .card-header h2 {
+            font-size: 18px;
+            color: #333;
+        }
+
+        .add-btn {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .add-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #333;
+        }
+
+        td {
+            color: #666;
+        }
+
+        .action-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            margin-right: 6px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+        }
+
+        /* 查看按钮 - 蓝色 */
+        .view-btn {
+            background: #bbdefb;
+            color: #0d47a1;
+        }
+
+        .view-btn:hover {
+            background: #90caf9;
+        }
+
+        /* 编辑按钮 - 橙色 */
+        .edit-btn {
+            background: #ffe0b2;
+            color: #e65100;
+        }
+
+        .edit-btn:hover {
+            background: #ffcc80;
+        }
+
+        /* 删除按钮 - 红色 */
+        .delete-btn {
+            background: #ffcdd2;
+            color: #c62828;
+        }
+
+        .delete-btn:hover {
+            background: #ef9a9a;
+        }
+
+        /* 通话记录按钮 - 紫色 */
+        .records-btn {
+            background: #e1bee7;
+            color: #6a1b9a;
+        }
+
+        .records-btn:hover {
+            background: #ce93d8;
+        }
+
+        /* 通话记录模态框样式 */
+        #records-modal {
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #records-modal .modal-content {
+            background: white;
+            border-radius: 12px;
+            width: 85%;
+            max-width: 1000px;
+            height: 75vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        #records-modal .modal-header {
+            padding: 24px 32px;
+            border-bottom: 2px solid #f0f0f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        #records-modal .modal-header h2 {
+            margin: 0;
+            font-size: 22px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        #records-modal .modal-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0;
+        }
+
+        /* 表头固定区域 */
+        #records-modal .table-header {
+            padding: 0 32px;
+            background: #fafafa;
+            border-bottom: 2px solid #e0e0e0;
+            flex-shrink: 0;
+        }
+
+        #records-modal .table-header table {
+            width: 100%;
+        }
+
+        #records-modal .table-header th {
+            padding: 16px 20px;
+            text-align: left;
+            font-weight: 600;
+            color: #555;
+            white-space: nowrap;
+        }
+
+        /* 表格滚动区域 */
+        #records-modal .table-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0 32px;
+        }
+
+        #records-modal .table-body table {
+            width: 100%;
+        }
+
+        #records-modal .table-body td {
+            padding: 14px 20px;
+            border-bottom: 1px solid #f0f0f0;
+            color: #333;
+        }
+
+        #records-modal .table-body tbody tr:hover {
+            background: #f9f9f9;
+        }
+
+        #records-modal .table-body audio {
+            max-width: 200px;
+            height: 32px;
+        }
+
+        #records-modal .close {
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #999;
+            line-height: 1;
+            transition: color 0.2s;
+        }
+
+        #records-modal .close:hover {
+            color: #333;
+        }
+
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-badge.success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-badge.no-answer {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .status-badge.busy {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-badge.failed {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .status-badge.initiated {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .status-badge.unknown {
+            background: #e2e3e5;
+            color: #383d41;
+        }
+
+        /* 通话类型徽章 */
+        .call-type-badge {
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .call-type-badge.outbound {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .call-type-badge.inbound {
+            background: #f3e5f5;
+            color: #7b1fa2;
+        }
+
+        .action-btn:hover {
+            opacity: 0.8;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        /* Modal样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .modal-header h3 {
+            font-size: 18px;
+            color: #333;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #999;
+        }
+
+        .close-btn:hover {
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 6px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            border-color: #667eea;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        .call-records {
+            margin-top: 20px;
+        }
+
+        .call-records h4 {
+            margin-bottom: 12px;
+            color: #333;
+        }
+
+        /* Toast 通知样式 */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .toast {
+            background: white;
+            padding: 16px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            min-width: 300px;
+            display: flex;
+            align-items: center;
+            animation: slideIn 0.3s ease-out;
+            border-left: 4px solid #667eea;
+        }
+
+        .toast.success {
+            border-left-color: #4caf50;
+        }
+
+        .toast.error {
+            border-left-color: #f44336;
+        }
+
+        .toast.warning {
+            border-left-color: #ff9800;
+        }
+
+        .toast.info {
+            border-left-color: #2196f3;
+        }
+
+        .toast-icon {
+            font-size: 20px;
+            margin-right: 12px;
+        }
+
+        .toast.success .toast-icon {
+            color: #4caf50;
+        }
+
+        .toast.error .toast-icon {
+            color: #f44336;
+        }
+
+        .toast.warning .toast-icon {
+            color: #ff9800;
+        }
+
+        .toast.info .toast-icon {
+            color: #2196f3;
+        }
+
+        .toast-message {
+            flex: 1;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .toast-close {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: #999;
+            padding: 0;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .toast-close:hover {
+            color: #333;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+        }
+
+        .toast.hiding {
+            animation: slideOut 0.3s ease-out;
+        }
+
+        /* 网络错误提示 */
+        .network-error {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: #f44336;
+            color: white;
+            padding: 12px 20px;
+            text-align: center;
+            font-size: 14px;
+            z-index: 9999;
+            display: none;
+        }
+
+        .network-error.show {
+            display: block;
+        }
+
+        /* 确认对话框样式 */
+        .confirm-dialog {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 10001;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .confirm-dialog.show {
+            display: flex;
+        }
+
+        .confirm-dialog-content {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+        }
+
+        .confirm-dialog-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .confirm-dialog-icon {
+            font-size: 24px;
+            margin-right: 12px;
+            color: #ff9800;
+        }
+
+        .confirm-dialog-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .confirm-dialog-message {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .confirm-dialog-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .confirm-dialog-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .confirm-dialog-btn.cancel {
+            background: #e0e0e0;
+            color: #666;
+        }
+
+        .confirm-dialog-btn.confirm {
+            background: #f44336;
+            color: white;
+        }
+
+        .confirm-dialog-btn:hover {
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 网络错误提示 -->
+        <div id="network-error" class="network-error">
+            ⚠️ 网络连接已断开，请检查网络设置
+        </div>
+
+        <!-- Toast 通知容器 -->
+        <div id="toast-container" class="toast-container"></div>
+
+        <div class="header">
+            <h1>客户管理</h1>
+            <p>管理客户信息，查看通话记录</p>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h2>客户列表</h2>
+                <button class="add-btn" onclick="showAddModal()">+ 添加客户</button>
+            </div>
+            <table id="customers-table">
+                <thead>
+                    <tr>
+                        <th>姓名</th>
+                        <th>电话</th>
+                        <th>备注</th>
+                        <th>创建时间</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td colspan="5" class="empty-state">加载中...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 添加/编辑客户Modal -->
+    <div id="customer-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-title">添加客户</h3>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+            <form id="customer-form">
+                <input type="hidden" id="customer-id">
+                <div class="form-group">
+                    <label>姓名 *</label>
+                    <input type="text" id="customer-name" required>
+                </div>
+                <div class="form-group">
+                    <label>电话 *</label>
+                    <input type="tel" id="customer-phone" required maxlength="11">
+                </div>
+                <div class="form-group">
+                    <label>备注</label>
+                    <textarea id="customer-notes"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">取消</button>
+                    <button type="submit" class="btn btn-primary">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 客户详情Modal -->
+    <div id="detail-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>客户详情</h3>
+                <button class="close-btn" onclick="closeDetailModal()">&times;</button>
+            </div>
+            <div id="customer-detail">
+                <!-- 动态加载 -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = window.location.origin;
+
+        // ===== Toast 通知系统 =====
+        function showToast(message, type = 'info', duration = 3000) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+
+            const icons = {
+                success: '✅',
+                error: '❌',
+                warning: '⚠️',
+                info: 'ℹ️'
+            };
+
+            toast.innerHTML = `
+                <span class="toast-icon">${icons[type] || icons.info}</span>
+                <span class="toast-message">${message}</span>
+                <button class="toast-close" onclick="closeToast(this.parentElement)">&times;</button>
+            `;
+
+            container.appendChild(toast);
+
+            // 自动关闭
+            setTimeout(() => {
+                closeToast(toast);
+            }, duration);
+        }
+
+        function closeToast(toast) {
+            if (!toast || !toast.parentElement) return;
+            toast.classList.add('hiding');
+            setTimeout(() => {
+                if (toast.parentElement) {
+                    toast.parentElement.removeChild(toast);
+                }
+            }, 300);
+        }
+
+        // ===== 确认对话框 =====
+        let confirmCallback = null;
+
+        function showConfirmDialog(title, message, onConfirm) {
+            document.getElementById('confirm-title').textContent = title;
+            document.getElementById('confirm-message').textContent = message;
+            document.getElementById('confirm-dialog').classList.add('show');
+            confirmCallback = onConfirm;
+        }
+
+        function closeConfirmDialog() {
+            document.getElementById('confirm-dialog').classList.remove('show');
+            confirmCallback = null;
+        }
+
+        document.getElementById('confirm-ok-btn').addEventListener('click', () => {
+            if (confirmCallback) {
+                confirmCallback();
+            }
+            closeConfirmDialog();
+        });
+
+        // ===== 网络错误检测 =====
+        function checkNetworkStatus() {
+            const networkError = document.getElementById('network-error');
+            if (!navigator.onLine) {
+                networkError.classList.add('show');
+            } else {
+                networkError.classList.remove('show');
+            }
+        }
+
+        window.addEventListener('online', () => {
+            document.getElementById('network-error').classList.remove('show');
+            showToast('网络已恢复', 'success');
+            loadCustomers(); // 重新加载数据
+        });
+
+        window.addEventListener('offline', () => {
+            document.getElementById('network-error').classList.add('show');
+            showToast('网络连接已断开', 'error');
+        });
+
+        // 通用的 fetch 封装，带网络错误处理
+        async function safeFetch(url, options = {}) {
+            if (!navigator.onLine) {
+                showToast('网络连接已断开，请检查网络', 'error');
+                throw new Error('网络已断开');
+            }
+
+            try {
+                const response = await fetch(url, options);
+
+                if (!response.ok) {
+                    const errorText = await response.text().catch(() => '未知错误');
+                    let errorMsg = `请求失败 (${response.status})`;
+                    try {
+                        const errorJson = JSON.parse(errorText);
+                        if (errorJson.detail) {
+                            errorMsg = errorJson.detail;
+                        }
+                    } catch (e) {
+                        // 忽略 JSON 解析错误
+                    }
+                    throw new Error(errorMsg);
+                }
+
+                return response;
+            } catch (error) {
+                if (error.name === 'TypeError' && error.message.includes('fetch')) {
+                    showToast('网络连接失败，请检查网络设置', 'error');
+                }
+                throw error;
+            }
+        }
+
+        // 加载客户列表
+        async function loadCustomers() {
+            try {
+                const response = await safeFetch(`${API_BASE}/api/customers/`);
+                const customers = await response.json();
+                const tbody = document.querySelector('#customers-table tbody');
+
+                if (!customers || customers.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" class="empty-state">📋 暂无客户数据，点击"+ 添加客户"开始添加</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = '';
+
+                customers.forEach(customer => {
+                    const row = tbody.insertRow();
+                    row.innerHTML = `
+                        <td>${customer.name}</td>
+                        <td>${customer.phone}</td>
+                        <td>${customer.notes || '-'}</td>
+                        <td>${formatTime(customer.created_at)}</td>
+                        <td>
+                            <button class="action-btn view-btn" onclick="viewCustomer('${customer.id}')">查看</button>
+                            <button class="action-btn records-btn" onclick="viewCallRecords('${customer.id}', '${customer.name}')">通话记录</button>
+                            <button class="action-btn edit-btn" onclick="editCustomer('${customer.id}')">编辑</button>
+                            <button class="action-btn delete-btn" onclick="deleteCustomer('${customer.id}')">删除</button>
+                        </td>
+                    `;
+                });
+
+            } catch (error) {
+                console.error('加载客户列表失败:', error);
+                const tbody = document.querySelector('#customers-table tbody');
+                tbody.innerHTML = '<tr><td colspan="5" class="empty-state">❌ 加载失败，请刷新页面重试</td></tr>';
+                showToast('加载客户列表失败: ' + error.message, 'error');
+            }
+        }
+
+        // 显示添加Modal
+        function showAddModal() {
+            document.getElementById('modal-title').textContent = '添加客户';
+            document.getElementById('customer-form').reset();
+            document.getElementById('customer-id').value = '';
+            document.getElementById('customer-modal').classList.add('show');
+        }
+
+        // 编辑客户
+        async function editCustomer(id) {
+            try {
+                const response = await safeFetch(`${API_BASE}/api/customers/${id}`);
+                const customer = await response.json();
+
+                document.getElementById('modal-title').textContent = '编辑客户';
+                document.getElementById('customer-id').value = customer.id;
+                document.getElementById('customer-name').value = customer.name;
+                document.getElementById('customer-phone').value = customer.phone;
+                document.getElementById('customer-notes').value = customer.notes || '';
+                document.getElementById('customer-modal').classList.add('show');
+
+            } catch (error) {
+                console.error('加载客户信息失败:', error);
+                showToast('加载客户信息失败: ' + error.message, 'error');
+            }
+        }
+
+        // 查看客户详情
+        async function viewCustomer(id) {
+            try {
+                const response = await safeFetch(`${API_BASE}/api/customers/${id}`);
+                const customer = await response.json();
+
+                const detailHtml = `
+                    <div style="margin-bottom: 20px;">
+                        <p><strong>姓名：</strong>${customer.name}</p>
+                        <p><strong>电话：</strong>${customer.phone}</p>
+                        <p><strong>备注：</strong>${customer.notes || '-'}</p>
+                        <p><strong>创建时间：</strong>${formatTime(customer.created_at)}</p>
+                    </div>
+                    <div class="call-records">
+                        <h4>通话记录</h4>
+                        <p>（功能开发中...）</p>
+                    </div>
+                `;
+
+                document.getElementById('customer-detail').innerHTML = detailHtml;
+                document.getElementById('detail-modal').classList.add('show');
+
+            } catch (error) {
+                console.error('加载客户详情失败:', error);
+                showToast('加载客户详情失败: ' + error.message, 'error');
+            }
+        }
+
+        // 删除客户
+        async function deleteCustomer(id) {
+            showConfirmDialog(
+                '删除客户',
+                '确定要删除这个客户吗？此操作不可恢复，客户的所有通话记录也将被删除。',
+                async () => {
+                    try {
+                        await safeFetch(`${API_BASE}/api/customers/${id}`, {
+                            method: 'DELETE'
+                        });
+
+                        showToast('客户删除成功', 'success');
+                        loadCustomers();
+
+                    } catch (error) {
+                        console.error('删除失败:', error);
+                        showToast('删除失败: ' + error.message, 'error');
+                    }
+                }
+            );
+        }
+
+        // 关闭Modal
+        function closeModal() {
+            document.getElementById('customer-modal').classList.remove('show');
+        }
+
+        function closeDetailModal() {
+            document.getElementById('detail-modal').classList.remove('show');
+        }
+
+        // 表单提交
+        document.getElementById('customer-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const id = document.getElementById('customer-id').value;
+            const data = {
+                name: document.getElementById('customer-name').value,
+                phone: document.getElementById('customer-phone').value,
+                notes: document.getElementById('customer-notes').value
+            };
+
+            // 验证必填字段
+            if (!data.name || !data.phone) {
+                showToast('请填写姓名和电话', 'warning');
+                return;
+            }
+
+            // 验证手机号格式
+            if (!/^1[3-9]\d{9}$/.test(data.phone)) {
+                showToast('请输入正确的手机号码', 'warning');
+                return;
+            }
+
+            try {
+                let response;
+                if (id) {
+                    // 更新
+                    response = await safeFetch(`${API_BASE}/api/customers/${id}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    });
+                } else {
+                    // 创建
+                    response = await safeFetch(`${API_BASE}/api/customers/`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    });
+                }
+
+                showToast(id ? '客户信息更新成功' : '客户添加成功', 'success');
+                closeModal();
+                loadCustomers();
+
+            } catch (error) {
+                console.error('保存失败:', error);
+                showToast('保存失败: ' + error.message, 'error');
+            }
+        });
+
+        function formatTime(timestamp) {
+            if (!timestamp) return '-';
+            const date = new Date(timestamp);
+            return date.toLocaleString('zh-CN');
+        }
+
+        // 页面加载时获取客户列表
+        window.onload = () => {
+            checkNetworkStatus();
+            loadCustomers();
+        };
+
+        // 查看客户通话记录
+        async function viewCallRecords(customerId, customerName) {
+            try {
+                const response = await safeFetch(`${API_BASE}/api/customers/${customerId}/call-records`);
+                const data = await response.json();
+                const records = data.records || [];
+
+                // 更新模态框标题
+                document.getElementById('records-modal-title').textContent = `${customerName} - 通话记录`;
+
+                // 渲染通话记录表格
+                const tbody = document.querySelector('#call-records-table tbody');
+                if (records.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 40px; color: #999;">📞 暂无通话记录</td></tr>';
+                } else {
+                    tbody.innerHTML = records.map(record => {
+                        const callType = record.call_type === 'Inbound' ? '呼入' : '外呼';
+                        const callTypeClass = record.call_type === 'Inbound' ? 'inbound' : 'outbound';
+                        const statusClass = getStatusClass(record.status);
+                        const duration = formatDuration(record.duration);
+                        const startTime = formatTime(record.started_at);
+
+                        // 录音播放器（和外呼管理一样）
+                        let recordingHtml = '-';
+                        if (record.recording_url) {
+                            recordingHtml = `<audio controls preload="none" src="${record.recording_url}">您的浏览器不支持audio元素</audio>`;
+                        }
+
+                        return `
+                            <tr>
+                                <td>${record.callee_number || '-'}</td>
+                                <td><span class="call-type-badge ${callTypeClass}">${callType}</span></td>
+                                <td><span class="status-badge ${statusClass}">${formatStatus(record.status)}</span></td>
+                                <td>${duration}</td>
+                                <td>${startTime}</td>
+                                <td>${recordingHtml}</td>
+                            </tr>
+                        `;
+                    }).join('');
+                }
+
+                // 显示模态框
+                document.getElementById('records-modal').style.display = 'flex';
+
+            } catch (error) {
+                console.error('获取通话记录失败:', error);
+                showToast('获取通话记录失败: ' + error.message, 'error');
+            }
+        }
+
+        // 获取状态样式类
+        function getStatusClass(status) {
+            const statusMap = {
+                'Success': 'success',
+                'NoAnswer': 'no-answer',
+                'AbandonedInRing': 'no-answer',
+                'Busy': 'busy',
+                'Failed': 'failed',
+                'initiated': 'initiated',
+                'failed': 'failed'
+            };
+            return statusMap[status] || 'unknown';
+        }
+
+        // 关闭通话记录模态框
+        function closeRecordsModal() {
+            document.getElementById('records-modal').style.display = 'none';
+        }
+
+        // 格式化通话状态
+        function formatStatus(status) {
+            const statusMap = {
+                'Success': '成功',
+                'NoAnswer': '未接听',
+                'AbandonedInRing': '响铃放弃',
+                'Busy': '忙线',
+                'Failed': '失败',
+                'initiated': '已发起',
+                'failed': '失败',
+                'answered': '已接听',
+                'no_answer': '未接听',
+                'busy': '忙线'
+            };
+            return statusMap[status] || status || '未知';
+        }
+
+        // 格式化时长
+        function formatDuration(seconds) {
+            if (!seconds || seconds === 0 || seconds === '') return '-';
+            const min = Math.floor(seconds / 60);
+            const sec = seconds % 60;
+            return min > 0 ? `${min}分${sec}秒` : `${sec}秒`;
+        }
+    </script>
+
+    <!-- 通话记录Modal -->
+    <div id="records-modal" class="modal" style="display: none;">
+        <div class="modal-content" style="max-width: 1000px;">
+            <div class="modal-header">
+                <h2 id="records-modal-title">通话记录</h2>
+                <span class="close" onclick="closeRecordsModal()">&times;</span>
+            </div>
+            <div class="table-header">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 15%;">号码</th>
+                            <th style="width: 10%;">类型</th>
+                            <th style="width: 12%;">状态</th>
+                            <th style="width: 10%;">时长</th>
+                            <th style="width: 23%;">开始时间</th>
+                            <th style="width: 30%;">录音</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+            <div class="table-body">
+                <table id="call-records-table">
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- 确认对话框 -->
+    <div id="confirm-dialog" class="confirm-dialog">
+        <div class="confirm-dialog-content">
+            <div class="confirm-dialog-header">
+                <span class="confirm-dialog-icon">⚠️</span>
+                <span class="confirm-dialog-title" id="confirm-title">确认操作</span>
+            </div>
+            <div class="confirm-dialog-message" id="confirm-message">
+                确定要执行此操作吗？
+            </div>
+            <div class="confirm-dialog-actions">
+                <button class="confirm-dialog-btn cancel" onclick="closeConfirmDialog()">取消</button>
+                <button class="confirm-dialog-btn confirm" id="confirm-ok-btn">确定</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

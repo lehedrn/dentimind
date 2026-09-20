@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>软电话 - 呼入模块</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .header {
+            background: white;
+            padding: 20px 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header h1 { font-size: 24px; color: #333; }
+        .main-grid { display: grid; grid-template-columns: 380px 1fr; gap: 20px; }
+        @media (max-width: 900px) { .main-grid { grid-template-columns: 1fr; } }
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            margin-bottom: 20px;
+        }
+        .card h2 {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        .status-bar {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            gap: 10px;
+        }
+        .status-dot { width: 12px; height: 12px; border-radius: 50%; background: #ccc; flex-shrink: 0; }
+        .status-dot.gray { background: #999; }
+        .status-dot.green { background: #4caf50; }
+        .status-dot.orange { background: #ff9800; }
+        .status-dot.yellow { background: #ffc107; animation: pulse 0.8s infinite; }
+        .status-dot.red { background: #f44336; animation: pulse 1s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+        .status-text { flex: 1; }
+        .status-label { font-size: 16px; font-weight: 600; color: #333; }
+        .status-detail { font-size: 12px; color: #888; margin-top: 2px; }
+        .caller-popup {
+            display: none;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            animation: slideDown 0.3s ease-out;
+        }
+        .caller-popup.show { display: block; }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        .caller-popup h3 { font-size: 16px; margin-bottom: 12px; opacity: 0.9; }
+        .caller-info { background: rgba(255, 255, 255, 0.15); padding: 12px; border-radius: 8px; margin-bottom: 12px; }
+        .caller-info .phone { font-size: 24px; font-weight: bold; letter-spacing: 1px; margin-bottom: 8px; }
+        .caller-info .detail { font-size: 14px; opacity: 0.9; line-height: 1.6; }
+        .caller-actions { display: flex; gap: 10px; }
+        .caller-actions .btn { flex: 1; padding: 12px; font-size: 15px; font-weight: 600; border: none; border-radius: 6px; cursor: pointer; transition: opacity 0.2s; }
+        .caller-actions .btn:hover { opacity: 0.9; }
+        .btn-answer { background: #4caf50; color: white; }
+        .btn-hangup { background: #f44336; color: white; }
+        .call-controls { display: none; padding: 16px; background: #f8f9fa; border-radius: 8px; margin-top: 16px; }
+        .call-controls.show { display: block; }
+        .call-controls h3 { font-size: 14px; color: #666; margin-bottom: 12px; }
+        .control-buttons { display: flex; gap: 10px; flex-wrap: wrap; }
+        .control-buttons .btn { flex: 1; min-width: 100px; padding: 10px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; transition: opacity 0.2s; }
+        .control-buttons .btn:hover { opacity: 0.9; }
+        .btn-hold { background: #ff9800; color: white; }
+        .btn-retrieve { background: #2196f3; color: white; }
+        .btn-mute { background: #9c27b0; color: white; }
+        .records-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+        .records-table th { background: #f8f9fa; padding: 12px 10px; text-align: left; font-weight: 600; color: #555; border-bottom: 2px solid #e0e0e0; }
+        .records-table td { padding: 12px 10px; border-bottom: 1px solid #f0f0f0; color: #333; }
+        .direction-badge { display: inline-block; padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+        .direction-badge.inbound { background: #e3f2fd; color: #1976d2; }
+        .direction-badge.outbound { background: #e8f5e9; color: #388e3c; }
+        .status-badge { display: inline-block; padding: 4px 10px; border-radius: 4px; font-size: 12px; }
+        .status-badge.completed { background: #e8f5e9; color: #388e3c; }
+        .status-badge.answered { background: #e8f5e9; color: #388e3c; }
+        .status-badge.ringing { background: #fff3e0; color: #f57c00; }
+        .status-badge.failed { background: #ffebee; color: #c62828; }
+        .empty-state { text-align: center; padding: 40px 20px; color: #999; font-size: 14px; }
+        .toast-container { position: fixed; top: 20px; right: 20px; z-index: 10000; display: flex; flex-direction: column; gap: 10px; }
+        .toast { background: white; padding: 14px 18px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); min-width: 280px; display: flex; align-items: center; animation: slideIn 0.3s ease-out; border-left: 4px solid #667eea; }
+        .toast.success { border-left-color: #4caf50; }
+        .toast.error { border-left-color: #f44336; }
+        .toast.warning { border-left-color: #ff9800; }
+        .toast.info { border-left-color: #2196f3; }
+        .toast-icon { font-size: 18px; margin-right: 10px; }
+        .toast-message { flex: 1; color: #333; font-size: 14px; }
+        .toast-close { background: none; border: none; font-size: 18px; cursor: pointer; color: #999; }
+        @keyframes slideIn { from { transform: translateX(400px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        .btn { padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; transition: background 0.2s; }
+        .btn-primary { background: #667eea; color: white; }
+        .btn-primary:hover { background: #5568d3; }
+        .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+        .log-container { background: #1e1e1e; color: #d4d4d4; padding: 12px; border-radius: 8px; font-size: 12px; max-height: 400px; overflow-y: auto; font-family: 'Consolas', 'Monaco', monospace; }
+        .log-entry { margin: 2px 0; line-height: 1.5; }
+        .log-entry.error { color: #f48771; }
+        .log-entry.success { color: #89d185; }
+        .log-entry.warn { color: #e5c07b; }
+        .log-entry.info { color: #6fb3d2; }
+    </style>
+</head>
+<body>
+    <div id="toast-container" class="toast-container"></div>
+    <div class="container">
+        <div class="header">
+            <h1>📞 软电话</h1>
+            <button class="btn btn-primary" onclick="loadCallRecords()">🔄 刷新记录</button>
+        </div>
+        <div class="main-grid">
+            <div>
+                <div class="card">
+                    <h2>坐席状态</h2>
+                    <div class="status-bar">
+                        <div class="status-dot gray" id="status-dot"></div>
+                        <div class="status-text">
+                            <div class="status-label" id="status-label">初始化中</div>
+                            <div class="status-detail" id="status-detail"></div>
+                        </div>
+                    </div>
+                    <div class="caller-popup" id="caller-popup">
+                        <h3 id="popup-direction">📞 来电</h3>
+                        <div class="caller-info">
+                            <div class="phone" id="popup-phone">-</div>
+                            <div class="detail" id="popup-detail">查询中...</div>
+                        </div>
+                        <div class="caller-actions">
+                            <button class="btn btn-answer" onclick="answerCall()">📞 接听</button>
+                            <button class="btn btn-hangup" onclick="hangupCall()">📴 挂断</button>
+                        </div>
+                    </div>
+                    <div class="call-controls" id="call-controls">
+                        <h3>通话控制</h3>
+                        <div class="control-buttons">
+                            <button class="btn btn-hold" id="btn-hold" onclick="holdCall()">🔇 保持</button>
+                            <button class="btn btn-retrieve" id="btn-retrieve" onclick="retrieveCall()" style="display:none;">🔊 取回</button>
+                            <button class="btn btn-mute" id="btn-mute" onclick="toggleMute()">🎤 静音</button>
+                            <button class="btn btn-hangup" onclick="hangupCall()">📴 挂断</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <h2>最近通话</h2>
+                    <table class="records-table">
+                        <thead>
+                            <tr>
+                                <th>号码</th>
+                                <th>方向</th>
+                                <th>状态</th>
+                                <th>时长</th>
+                                <th>时间</th>
+                            </tr>
+                        </thead>
+                        <tbody id="records-body">
+                            <tr><td colspan="5" class="empty-state">加载中...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div>
+                <div class="card">
+                    <h2>控制台</h2>
+                    <div class="status-bar">
+                        <button class="btn btn-primary" id="btn-register" onclick="doRegister()">注册/上线</button>
+                        <button class="btn btn-primary" id="btn-logout" onclick="doLogout()" style="display:none;">下线</button>
+                        <button class="btn btn-primary" id="btn-force" onclick="doForceRegister()" style="display:none; background:#f44336;">强制注册</button>
+                    </div>
+                    <div class="log-container" id="console-log"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Workbench SDK 3.8.1 核心版本（不使用 IM） -->
+    <script src="https://g.alicdn.com/cloudcallcenter/web-workbench-sdk/3.8.1/core.min.js"></script>
+
+    <script>
+        // ========== 配置 ==========
+        const CONFIG = {
+            instanceId: 'demo-1767693362317534',
+            regionId: 'cn-shanghai',
+            ajaxPath: '/api/ccc-proxy',
+            afterCallRule: 15,
+            autoAnswerCall: 0,
+            exportErrorOfApi: true,
+        };
+
+        // ========== 状态管理 ==========
+        let workbenchSdk = null;
+        let currentCall = {
+            jobId: null,
+            callType: null,
+            caller: null,
+            callee: null,
+        };
+        let callState = {
+            isOnHold: false,
+            isMuted: false,
+        };
+
+        // 状态码映射
+        const STATUS_MAP = {
+            '-1': { label: '未注册', dot: 'gray' },
+            '0': { label: '注册中', dot: 'gray' },
+            '1': { label: '离线', dot: 'gray' },
+            '2': { label: '小休', dot: 'green' },
+            '3': { label: '空闲', dot: 'green' },
+            '4': { label: '仅外呼', dot: 'green' },
+            '5': { label: '话后处理', dot: 'orange' },
+            '6': { label: '来电振铃', dot: 'yellow' },
+            '8': { label: '拨号中', dot: 'yellow' },
+            '9': { label: '呼入通话', dot: 'red' },
+            '10': { label: '呼出通话', dot: 'red' },
+            '11': { label: '内部通话', dot: 'red' },
+            '12': { label: '通话保持', dot: 'orange' },
+            '16': { label: '发起三方', dot: 'orange' },
+            '17': { label: '咨询通话', dot: 'orange' },
+        };
+
+        // ========== 日志函数 ==========
+        function log(message, type = 'info') {
+            const logDiv = document.getElementById('console-log');
+            const entry = document.createElement('div');
+            entry.className = 'log-entry ' + type;
+            entry.textContent = '[' + new Date().toLocaleTimeString() + '] ' + message;
+            logDiv.appendChild(entry);
+            logDiv.scrollTop = logDiv.scrollHeight;
+            console.log('[CCC] ' + message);
+        }
+
+        function updateStatus(code, detail) {
+            const dot = document.getElementById('status-dot');
+            const label = document.getElementById('status-label');
+            const detailEl = document.getElementById('status-detail');
+            const info = STATUS_MAP[String(code)] || { label: `状态 ${code}`, dot: 'gray' };
+            dot.className = 'status-dot ' + info.dot;
+            label.textContent = info.label;
+            detailEl.textContent = detail || '';
+        }
+
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = 'toast ' + type;
+            const icons = { success: '✅', error: '❌', warning: '⚠️', info: 'ℹ️' };
+            toast.innerHTML = `<span class="toast-icon">${icons[type] || icons.info}</span><span class="toast-message">${message}</span><button class="toast-close" onclick="this.parentElement.remove()">&times;</button>`;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 5000);
+        }
+
+        // ========== SDK 初始化 ==========
+        function initSdk() {
+            try {
+                log('初始化 SDK 3.8.1...', 'info');
+
+                workbenchSdk = new window.CCCWorkbenchSDK({
+                    ...CONFIG,
+
+                    onInit() {
+                        log('✓ SDK 初始化完成', 'success');
+                        updateStatus(-1, '等待注册');
+                    },
+
+                    onRegister(event) {
+                        log('✓ SIP 注册成功', 'success');
+                        showToast('SIP 注册成功', 'success');
+                    },
+
+                    onLogIn(event) {
+                        log('✓ 坐席登录成功', 'success');
+                        updateStatus(3, '已登录，等待来电');
+                        showToast('坐席已登录', 'success');
+                        document.getElementById('btn-register').style.display = 'none';
+                        document.getElementById('btn-logout').style.display = '';
+                    },
+
+                    onReady() {
+                        log('✓ 坐席空闲', 'success');
+                        updateStatus(3, '等待来电');
+                    },
+
+                    onBreak(event) {
+                        log('坐席小休: ' + (event.breakReason || '未知'), 'info');
+                        updateStatus(2, '小休中');
+                    },
+
+                    onLogOut() {
+                        log('坐席登出', 'info');
+                        updateStatus(1, '已登出');
+                        showToast('坐席已登出', 'info');
+                        document.getElementById('btn-register').style.display = '';
+                        document.getElementById('btn-logout').style.display = 'none';
+                        document.getElementById('btn-force').style.display = 'none';
+                    },
+
+                    onCallComing(event) {
+                        log('✓ 来电: ' + (event.caller || '未知'), 'success');
+                        currentCall.jobId = event.jobId;
+                        currentCall.callType = event.callType || 'Inbound';
+                        currentCall.caller = event.caller || '未知';
+                        currentCall.callee = event.callee;
+
+                        showCallerPopup('📞 来电', currentCall.caller);
+                        updateStatus(6, '来电: ' + currentCall.caller);
+                        showToast('来电: ' + formatPhone(currentCall.caller), 'info');
+
+                        sendCallEvent('call_coming', {
+                            callId: event.jobId,
+                            caller: event.caller,
+                            callee: event.callee,
+                            callType: event.callType,
+                        });
+                    },
+
+                    onCallDialing(event) {
+                        log('外呼振铃: ' + (event.callee || '未知'), 'info');
+                        currentCall.jobId = event.jobId;
+                        currentCall.callType = event.callType || 'Outbound';
+                        currentCall.caller = event.caller;
+                        currentCall.callee = event.callee;
+                        updateStatus(8, '拨号: ' + event.callee);
+
+                        sendCallEvent('call_dialing', {
+                            callId: event.jobId,
+                            caller: event.caller,
+                            callee: event.callee,
+                            callType: event.callType,
+                        });
+                    },
+
+                    onCallEstablish(event) {
+                        log('✓ 通话接通', 'success');
+                        hideCallerPopup();
+                        showCallControls(true);
+                        const statusCode = currentCall.callType === 'Outbound' ? 10 : 9;
+                        updateStatus(statusCode, '通话中');
+
+                        sendCallEvent('call_establish', { callId: currentCall.jobId });
+                    },
+
+                    onCallRelease(event) {
+                        log('✓ 通话结束', 'info');
+                        hideCallerPopup();
+                        showCallControls(false);
+                        updateStatus(5, '话后处理');
+
+                        sendCallEvent('call_release', { callId: currentCall.jobId });
+
+                        currentCall = { jobId: null, callType: null, caller: null, callee: null };
+                        callState = { isOnHold: false, isMuted: false };
+
+                        setTimeout(loadCallRecords, 1000);
+                    },
+
+                    onBeforeCallDialing(payload) {
+                        if (payload && payload.callback) payload.callback();
+                    },
+
+                    onBeforeCallHangup(payload) {
+                        if (payload && payload.callback) payload.callback();
+                    },
+
+                    onHangUp(type) {
+                        log('挂机类型: ' + type, 'info');
+                    },
+
+                    onStatusChange(event) {
+                        log('状态变化: ' + event.lastCode + ' → ' + event.code, 'info');
+                    },
+
+                    onErrorNotify(event) {
+                        const errorCode = event.errorCode;
+                        const errorMsg = event.errorMsgTip || event.errorMsg || '未知错误';
+                        log('✗ 错误 ' + errorCode + ': ' + errorMsg, 'error');
+
+                        switch (errorCode) {
+                            case 7001:
+                                // 设备冲突：已有设备在线
+                                log('⚠ 设备冲突: 已有设备在线', 'warn');
+                                showToast('检测到其他设备在线，请点击"强制注册"', 'warning');
+                                document.getElementById('btn-force').style.display = '';
+                                break;
+
+                            case 7002:
+                                // SIP 初始化异常
+                                showToast('SIP 初始化异常，请刷新页面', 'error');
+                                break;
+
+                            case 8001:
+                            case 8002:
+                                // 浏览器无麦克风权限
+                                showToast('请允许浏览器使用麦克风', 'error');
+                                break;
+
+                            case 8003:
+                                // 已在通话中
+                                showToast('已在通话中', 'warning');
+                                break;
+
+                            case 9001:
+                                // 当前状态不能执行此操作
+                                showToast('当前状态无法执行此操作', 'warning');
+                                break;
+
+                            default:
+                                showToast(`错误 ${errorCode}: ${errorMsg}`, 'error');
+                        }
+                    },
+                });
+
+                log('✓ SDK 实例创建成功', 'success');
+            } catch (err) {
+                log('✗ SDK 初始化失败: ' + err.message, 'error');
+                console.error(err);
+            }
+        }
+
+        // ========== 注册/登出 ==========
+        async function doRegister() {
+            if (!workbenchSdk) {
+                log('✗ SDK 未初始化', 'error');
+                return;
+            }
+
+            try {
+                log('调用 register()...', 'info');
+                updateStatus(0, '正在注册...');
+                document.getElementById('btn-register').disabled = true;
+
+                const skillGroups = workbenchSdk.getSkillGroups();
+                const allGroups = skillGroups.allSkillGroupList || [];
+
+                if (!Array.isArray(allGroups) || allGroups.length === 0) {
+                    log('✗ 没有可用的技能组', 'error');
+                    updateStatus(-1, '无可用技能组');
+                    document.getElementById('btn-register').disabled = false;
+                    return;
+                }
+
+                log('可用技能组: ' + allGroups.length + ' 个', 'info');
+                allGroups.forEach(g => log('  - ' + (g.skillGroupName || g.name || g.skillGroupId), 'info'));
+
+                await workbenchSdk.register({
+                    currentSkillGroups: allGroups,
+                });
+
+                log('✓ register() 成功', 'success');
+            } catch (err) {
+                log('✗ register() 失败: ' + err.message, 'error');
+                updateStatus(-1, '注册失败');
+                document.getElementById('btn-register').disabled = false;
+            }
+        }
+
+        async function doForceRegister() {
+            if (!workbenchSdk) return;
+
+            try {
+                log('调用 forceToPrepareSignIn()...', 'info');
+                await workbenchSdk.forceToPrepareSignIn();
+                log('✓ 强制注册成功', 'success');
+                document.getElementById('btn-force').style.display = 'none';
+                showToast('强制注册成功', 'success');
+            } catch (err) {
+                log('✗ 强制注册失败: ' + err.message, 'error');
+            }
+        }
+
+        async function doLogout() {
+            if (!workbenchSdk) return;
+
+            try {
+                log('调用 logOut()...', 'info');
+                await workbenchSdk.logOut();
+                log('✓ 下线成功', 'success');
+            } catch (err) {
+                log('✗ 下线失败: ' + err.message, 'error');
+            }
+        }
+
+        // ========== 通话控制 ==========
+        function answerCall() {
+            if (!workbenchSdk) return;
+            workbenchSdk.answer()
+                .then(() => {
+                    log('✓ 接听成功', 'success');
+                    showToast('已接听', 'success');
+                })
+                .catch(err => log('✗ 接听失败: ' + err.message, 'error'));
+        }
+
+        function hangupCall() {
+            if (!workbenchSdk) return;
+            workbenchSdk.hangUp()
+                .then(() => log('✓ 挂断成功', 'success'))
+                .catch(err => log('✗ 挂断失败: ' + err.message, 'error'));
+        }
+
+        function holdCall() {
+            if (!workbenchSdk) return;
+            workbenchSdk.callHold()
+                .then(() => {
+                    log('✓ 通话保持', 'success');
+                    showToast('通话已保持', 'success');
+                    callState.isOnHold = true;
+                    updateHoldButton();
+                })
+                .catch(err => log('✗ 保持失败: ' + err.message, 'error'));
+        }
+
+        function retrieveCall() {
+            if (!workbenchSdk) return;
+            workbenchSdk.callRetrieve()
+                .then(() => {
+                    log('✓ 通话取回', 'success');
+                    showToast('通话已取回', 'success');
+                    callState.isOnHold = false;
+                    updateHoldButton();
+                })
+                .catch(err => log('✗ 取回失败: ' + err.message, 'error'));
+        }
+
+        function toggleMute() {
+            if (!workbenchSdk) return;
+            if (callState.isMuted) {
+                workbenchSdk.unmuteAgent()
+                    .then(() => {
+                        log('✓ 取消静音', 'success');
+                        callState.isMuted = false;
+                        updateMuteButton();
+                    });
+            } else {
+                workbenchSdk.muteAgent()
+                    .then(() => {
+                        log('✓ 静音', 'success');
+                        showToast('已静音', 'info');
+                        callState.isMuted = true;
+                        updateMuteButton();
+                    });
+            }
+        }
+
+        function updateHoldButton() {
+            document.getElementById('btn-hold').style.display = callState.isOnHold ? 'none' : '';
+            document.getElementById('btn-retrieve').style.display = callState.isOnHold ? '' : 'none';
+        }
+
+        function updateMuteButton() {
+            document.getElementById('btn-mute').textContent = callState.isMuted ? '🔊 取消静音' : '🎤 静音';
+        }
+
+        // ========== 来电弹窗 ==========
+        function showCallerPopup(title, phone) {
+            document.getElementById('popup-direction').textContent = title;
+            document.getElementById('popup-phone').textContent = formatPhone(phone);
+            document.getElementById('popup-detail').textContent = '查询中...';
+            document.getElementById('caller-popup').classList.add('show');
+
+            fetchCustomerInfo(phone).then(customer => {
+                if (customer) {
+                    const lines = ['客户: ' + customer.name];
+                    if (customer.call_count > 0) lines.push('历史通话: ' + customer.call_count + ' 次');
+                    if (customer.last_call_time) lines.push('最近通话: ' + formatDateTime(customer.last_call_time));
+                    document.getElementById('popup-detail').innerHTML = lines.join('<br>');
+                } else {
+                    document.getElementById('popup-detail').textContent = '新客户';
+                }
+            });
+        }
+
+        function hideCallerPopup() {
+            document.getElementById('caller-popup').classList.remove('show');
+        }
+
+        function showCallControls(show) {
+            document.getElementById('call-controls').classList.toggle('show', show);
+            if (!show) {
+                callState = { isOnHold: false, isMuted: false };
+                updateHoldButton();
+                updateMuteButton();
+            }
+        }
+
+        // ========== 后端 API 调用 ==========
+        async function fetchCustomerInfo(phone) {
+            try {
+                const response = await fetch('/api/softphone/customer-info?phone=' + encodeURIComponent(phone));
+                const data = await response.json();
+                return (data.success && data.customer) ? data.customer : null;
+            } catch (err) {
+                return null;
+            }
+        }
+
+        async function sendCallEvent(eventType, callInfo) {
+            try {
+                await fetch('/api/softphone/call-event', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        event_type: eventType,
+                        call_detail: {
+                            call_id: callInfo.callId,
+                            caller: callInfo.caller,
+                            callee: callInfo.callee,
+                            call_type: callInfo.callType,
+                        },
+                    }),
+                });
+            } catch (err) {
+                log('事件上报失败', 'error');
+            }
+        }
+
+        async function loadCallRecords() {
+            try {
+                const response = await fetch('/api/softphone/call-records/recent?limit=20');
+                const data = await response.json();
+                const records = data.records || [];
+                const tbody = document.getElementById('records-body');
+
+                if (records.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" class="empty-state">📭 暂无通话记录</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = records.map(r => {
+                    const customerPhone = r.direction === 'inbound' ? (r.caller_number || '-') : (r.callee_number || '-');
+                    const directionLabel = r.direction === 'inbound' ? '呼入' : '呼出';
+                    const directionClass = r.direction === 'inbound' ? 'inbound' : 'outbound';
+                    const time = r.started_at ? formatDateTime(r.started_at) : '-';
+                    const duration = r.duration ? formatDuration(r.duration) : '-';
+                    const statusLabel = getStatusLabel(r.status);
+                    return `<tr>
+                        <td>${formatPhone(customerPhone)}</td>
+                        <td><span class="direction-badge ${directionClass}">${directionLabel}</span></td>
+                        <td><span class="status-badge">${statusLabel}</span></td>
+                        <td>${duration}</td>
+                        <td>${time}</td>
+                    </tr>`;
+                }).join('');
+            } catch (err) {
+                log('加载通话记录失败', 'error');
+            }
+        }
+
+        // ========== 工具函数 ==========
+        function formatPhone(phone) {
+            if (!phone || phone === '-') return '-';
+            if (phone.length === 11) return phone.substring(0, 3) + '****' + phone.substring(7);
+            return phone;
+        }
+
+        function formatDateTime(isoString) {
+            if (!isoString) return '-';
+            const date = new Date(isoString);
+            const now = new Date();
+            const isToday = date.toDateString() === now.toDateString();
+            if (isToday) return '今天 ' + date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+            const yesterday = new Date(now);
+            yesterday.setDate(yesterday.getDate() - 1);
+            if (date.toDateString() === yesterday.toDateString()) return '昨天 ' + date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+            return date.toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
+        }
+
+        function formatDuration(seconds) {
+            if (!seconds || seconds === 0) return '0:00';
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return mins + ':' + secs.toString().padStart(2, '0');
+        }
+
+        function getStatusLabel(status) {
+            const map = {
+                'ringing': '振铃中',
+                'answered': '已接通',
+                'completed': '已完成',
+                'failed': '未接通',
+            };
+            return map[status] || status || '-';
+        }
+
+        // ========== 启动 ==========
+        window.onload = () => {
+            initSdk();
+            loadCallRecords();
+        };
+    </script>
+</body>
+</html>

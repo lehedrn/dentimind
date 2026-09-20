@@ -1,0 +1,1188 @@
+<title>AI电话外呼调研报告</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #F5F6F8;
+  --surface: #FFFFFF;
+  --surface-raised: #FAFBFC;
+  --border: #E2E5EA;
+  --border-strong: #CDD1D8;
+  --text-primary: #1B2838;
+  --text-secondary: #4A5568;
+  --text-tertiary: #718096;
+  --accent: #0D7377;
+  --accent-light: #E6F4F4;
+  --accent-dark: #095355;
+  --danger: #C53030;
+  --danger-light: #FFF5F5;
+  --danger-border: #FEB2B2;
+  --warning: #B7791F;
+  --warning-light: #FFFFF0;
+  --warning-border: #FEFCBF;
+  --success: #276749;
+  --success-light: #F0FFF4;
+  --success-border: #C6F6D5;
+  --recommend: #553C9A;
+  --recommend-light: #FAF5FF;
+  --recommend-border: #E9D8FD;
+  --font-sans: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', 'SF Mono', Consolas, monospace;
+  --shadow-sm: 0 1px 2px rgba(27,40,56,0.05);
+  --shadow-md: 0 2px 8px rgba(27,40,56,0.08);
+  --shadow-lg: 0 4px 16px rgba(27,40,56,0.1);
+  --radius: 6px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0F1419;
+    --surface: #1A1F2E;
+    --surface-raised: #232A3B;
+    --border: #2D3548;
+    --border-strong: #3D4660;
+    --text-primary: #E8ECF1;
+    --text-secondary: #A0AEC0;
+    --text-tertiary: #718096;
+    --accent: #4FD1C5;
+    --accent-light: #1A2E2C;
+    --accent-dark: #81E6D9;
+    --danger: #FC8181;
+    --danger-light: #2D1B1B;
+    --danger-border: #742A2A;
+    --warning: #ECC94B;
+    --warning-light: #2D2A1B;
+    --warning-border: #744A2A;
+    --success: #68D391;
+    --success-light: #1B2D1F;
+    --success-border: #276749;
+    --recommend: #B794F4;
+    --recommend-light: #1F1B2D;
+    --recommend-border: #553C9A;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.2);
+    --shadow-md: 0 2px 8px rgba(0,0,0,0.3);
+    --shadow-lg: 0 4px 16px rgba(0,0,0,0.4);
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg: #0F1419;
+  --surface: #1A1F2E;
+  --surface-raised: #232A3B;
+  --border: #2D3548;
+  --border-strong: #3D4660;
+  --text-primary: #E8ECF1;
+  --text-secondary: #A0AEC0;
+  --text-tertiary: #718096;
+  --accent: #4FD1C5;
+  --accent-light: #1A2E2C;
+  --accent-dark: #81E6D9;
+  --danger: #FC8181;
+  --danger-light: #2D1B1B;
+  --danger-border: #742A2A;
+  --warning: #ECC94B;
+  --warning-light: #2D2A1B;
+  --warning-border: #744A2A;
+  --success: #68D391;
+  --success-light: #1B2D1F;
+  --success-border: #276749;
+  --recommend: #B794F4;
+  --recommend-light: #1F1B2D;
+  --recommend-border: #553C9A;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.2);
+  --shadow-md: 0 2px 8px rgba(0,0,0,0.3);
+  --shadow-lg: 0 4px 16px rgba(0,0,0,0.4);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: var(--font-sans);
+  background: var(--bg);
+  color: var(--text-primary);
+  line-height: 1.7;
+  font-size: 15px;
+  -webkit-font-smoothing: antialiased;
+}
+
+.container {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 40px 24px 80px;
+}
+
+header {
+  margin-bottom: 48px;
+  padding-bottom: 32px;
+  border-bottom: 2px solid var(--border);
+}
+
+.eyebrow {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+
+h1 {
+  font-size: 28px;
+  font-weight: 900;
+  line-height: 1.3;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+  text-wrap: balance;
+}
+
+.subtitle {
+  font-size: 16px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.meta-row {
+  display: flex;
+  gap: 16px;
+  margin-top: 16px;
+  flex-wrap: wrap;
+}
+
+.meta-tag {
+  font-size: 12px;
+  font-family: var(--font-mono);
+  padding: 4px 10px;
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text-tertiary);
+}
+
+.toc {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  margin-bottom: 40px;
+  box-shadow: var(--shadow-sm);
+}
+
+.toc-title {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-tertiary);
+  margin-bottom: 12px;
+}
+
+.toc-list {
+  list-style: none;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px 24px;
+}
+
+@media (max-width: 600px) {
+  .toc-list { grid-template-columns: 1fr; }
+}
+
+.toc-list a {
+  font-size: 14px;
+  color: var(--accent);
+  text-decoration: none;
+  display: block;
+  padding: 2px 0;
+}
+
+.toc-list a:hover { text-decoration: underline; }
+
+h2 {
+  font-size: 22px;
+  font-weight: 700;
+  margin-top: 48px;
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-primary);
+}
+
+h3 {
+  font-size: 17px;
+  font-weight: 600;
+  margin-top: 28px;
+  margin-bottom: 10px;
+  color: var(--text-primary);
+}
+
+p { margin-bottom: 14px; color: var(--text-secondary); }
+
+.callout {
+  padding: 16px 20px;
+  border-radius: var(--radius);
+  margin: 20px 0;
+  border-left: 3px solid;
+  font-size: 14px;
+}
+
+.callout-danger {
+  background: var(--danger-light);
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+.callout-warning {
+  background: var(--warning-light);
+  border-color: var(--warning);
+}
+
+.callout-success {
+  background: var(--success-light);
+  border-color: var(--success);
+}
+
+.callout-recommend {
+  background: var(--recommend-light);
+  border-color: var(--recommend);
+}
+
+.callout-title {
+  font-weight: 700;
+  margin-bottom: 4px;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.callout p { color: inherit; margin-bottom: 6px; font-size: 14px; }
+.callout p:last-child { margin-bottom: 0; }
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0 24px;
+  font-size: 13.5px;
+  background: var(--surface);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.table-wrap { overflow-x: auto; margin: 16px 0 24px; }
+.table-wrap table { margin: 0; }
+
+th {
+  background: var(--surface-raised);
+  font-weight: 600;
+  text-align: left;
+  padding: 10px 14px;
+  border-bottom: 2px solid var(--border);
+  color: var(--text-primary);
+  white-space: nowrap;
+  font-size: 12.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+td {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-secondary);
+  vertical-align: top;
+}
+
+tr:last-child td { border-bottom: none; }
+
+.badge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-family: var(--font-mono);
+  white-space: nowrap;
+}
+
+.badge-red { background: var(--danger-light); color: var(--danger); border: 1px solid var(--danger-border); }
+.badge-green { background: var(--success-light); color: var(--success); border: 1px solid var(--success-border); }
+.badge-yellow { background: var(--warning-light); color: var(--warning); border: 1px solid var(--warning-border); }
+.badge-purple { background: var(--recommend-light); color: var(--recommend); border: 1px solid var(--recommend-border); }
+
+.timeline {
+  position: relative;
+  padding-left: 28px;
+  margin: 20px 0;
+}
+
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 8px;
+  top: 4px;
+  bottom: 4px;
+  width: 2px;
+  background: var(--border);
+}
+
+.timeline-item {
+  position: relative;
+  margin-bottom: 20px;
+}
+
+.timeline-item::before {
+  content: '';
+  position: absolute;
+  left: -24px;
+  top: 6px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 2px solid var(--surface);
+  box-shadow: 0 0 0 2px var(--accent);
+}
+
+.timeline-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent);
+  font-family: var(--font-mono);
+  margin-bottom: 4px;
+}
+
+.timeline-content {
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.timeline-content strong { color: var(--text-primary); }
+
+.code-block {
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 18px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  overflow-x: auto;
+  margin: 12px 0 18px;
+  color: var(--text-primary);
+  line-height: 1.6;
+}
+
+.arch-box {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+  margin: 20px 0;
+  text-align: center;
+  box-shadow: var(--shadow-sm);
+}
+
+.arch-flow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 13px;
+  font-family: var(--font-mono);
+}
+
+.arch-node {
+  padding: 8px 14px;
+  border-radius: var(--radius);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.arch-node-user { background: var(--accent-light); color: var(--accent); border: 1px solid var(--accent); }
+.arch-node-ai { background: var(--recommend-light); color: var(--recommend); border: 1px solid var(--recommend-border); }
+.arch-node-tele { background: var(--warning-light); color: var(--warning); border: 1px solid var(--warning-border); }
+.arch-node-db { background: var(--success-light); color: var(--success); border: 1px solid var(--success-border); }
+
+.arch-arrow { color: var(--text-tertiary); font-size: 16px; }
+
+.cost-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 14px;
+}
+
+.cost-row:last-child { border-bottom: none; font-weight: 700; color: var(--text-primary); }
+.cost-label { color: var(--text-secondary); }
+.cost-value { font-family: var(--font-mono); color: var(--text-primary); }
+
+ul, ol {
+  margin: 10px 0 16px 20px;
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+li { margin-bottom: 6px; }
+li strong { color: var(--text-primary); }
+
+.step-list {
+  counter-reset: step;
+  list-style: none;
+  margin-left: 0;
+  padding: 0;
+}
+
+.step-list li {
+  counter-increment: step;
+  position: relative;
+  padding-left: 36px;
+  margin-bottom: 14px;
+}
+
+.step-list li::before {
+  content: counter(step);
+  position: absolute;
+  left: 0;
+  top: 1px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: white;
+  font-size: 12px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+}
+
+.divider {
+  height: 1px;
+  background: var(--border);
+  margin: 40px 0;
+}
+
+.footer {
+  margin-top: 48px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
+  font-size: 12px;
+  color: var(--text-tertiary);
+  text-align: center;
+}
+</style>
+
+<div class="container">
+
+<header>
+  <div class="eyebrow">技术调研报告</div>
+  <h1>中国大陆个人开发者 AI 电话外呼方案</h1>
+  <p class="subtitle">口腔医院 AI 客服系统 — 如何在无企业资质条件下，以最低成本、最快速度实现 AI 电话外呼与接听</p>
+  <div class="meta-row">
+    <span class="meta-tag">2026-09-07</span>
+    <span class="meta-tag">个人开发者</span>
+    <span class="meta-tag">口腔医院场景</span>
+    <span class="meta-tag">外呼 + 接听</span>
+  </div>
+</header>
+
+<nav class="toc">
+  <div class="toc-title">目录</div>
+  <ol class="toc-list">
+    <li><a href="#verdict">核心结论</a></li>
+    <li><a href="#platforms">云通信平台对比</a></li>
+    <li><a href="#compliance">合规红线</a></li>
+    <li><a href="#sip">SIP 软电话方案</a></li>
+    <li><a href="#opensource">开源语音 AI 框架</a></li>
+    <li><a href="#recommend">推荐方案</a></li>
+    <li><a href="#timeline">执行时间线</a></li>
+    <li><a href="#cost">成本估算</a></li>
+  </ol>
+</nav>
+
+<!-- ==================== 核心结论 ==================== -->
+<section id="verdict">
+<h2>核心结论</h2>
+
+<div class="callout callout-danger">
+  <div class="callout-title">残酷现实</div>
+  <p><strong>中国大陆所有主流云通信平台的电话外呼/接听服务，都要求企业实名认证。</strong>个人开发者身份（含个体工商户）无法直接开通阿里云语音服务、腾讯云呼叫中心、讯飞语音外呼等核心服务。</p>
+</div>
+
+<p>这不是技术限制，是<strong>法律合规要求</strong>：工信部规定电话外呼必须实名到企业，且需通过话术审核和备案。即使企业身份，<strong>个体工商户、自然人独资、个人独资公司也被排除</strong>（阿里云明确拒绝）。</p>
+
+<div class="callout callout-recommend">
+  <div class="callout-title">可行路径</div>
+  <p>虽然直接打电话存在资质壁垒，但有<strong>三条可操作的路径</strong>：</p>
+  <p>1. <strong>演示阶段</strong>：用 WebRTC + 开源框架搭建语音 AI Demo（无需电话线路，1-2天可完成）</p>
+  <p>2. <strong>小规模验证</strong>：注册有限责任公司（~2周）+ 国际 SIP 号码过渡测试（~1天）</p>
+  <p>3. <strong>正式部署</strong>：企业身份 + 合规服务商（阿里云/讯飞/容联云），3-4周可上线</p>
+</div>
+</section>
+
+<!-- ==================== 平台对比 ==================== -->
+<section id="platforms">
+<h2>云通信服务商对比</h2>
+
+<div class="table-wrap">
+<table>
+<thead>
+<tr>
+  <th>平台</th>
+  <th>个人可用?</th>
+  <th>免费额度</th>
+  <th>外呼 API</th>
+  <th>接听 Webhook</th>
+  <th>SIP Trunk</th>
+  <th>开通时间</th>
+  <th>关键限制</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><strong>阿里云语音服务</strong></td>
+  <td><span class="badge badge-red">不可用</span></td>
+  <td>有（需企业资质）</td>
+  <td>支持</td>
+  <td>支持</td>
+  <td>支持</td>
+  <td>3-5天</td>
+  <td>拒绝个体工商户/自然人独资；需企业资质+话术审核</td>
+</tr>
+<tr>
+  <td><strong>腾讯云呼叫中心(TCCC)</strong></td>
+  <td><span class="badge badge-yellow">部分可用</span></td>
+  <td>3座席×7天</td>
+  <td>支持</td>
+  <td>支持</td>
+  <td>支持</td>
+  <td>1天（创建应用），号码需5-7天</td>
+  <td>个人认证可体验，但购买电话号码需企业认证</td>
+</tr>
+<tr>
+  <td><strong>讯飞AI客服中间件</strong></td>
+  <td><span class="badge badge-red">不可用</span></td>
+  <td>线下试用</td>
+  <td>支持</td>
+  <td>支持</td>
+  <td>不提供线路</td>
+  <td>需线下对接</td>
+  <td>需企业认证；不提供外呼中继线路（需自备）；4000元/年/线起</td>
+</tr>
+<tr>
+  <td><strong>容联云通讯</strong></td>
+  <td><span class="badge badge-yellow">部分可用</span></td>
+  <td>支持个人认证</td>
+  <td>支持</td>
+  <td>支持</td>
+  <td>支持</td>
+  <td>1个工作日</td>
+  <td>个人可注册认证，但语音外呼需话术审核+备案；实际功能可能受限</td>
+</tr>
+<tr>
+  <td><strong>华为云语音通知</strong></td>
+  <td><span class="badge badge-red">不可用</span></td>
+  <td>—</td>
+  <td>支持</td>
+  <td>支持</td>
+  <td>支持</td>
+  <td>3-5天</td>
+  <td>需企业认证；审核严格</td>
+</tr>
+<tr>
+  <td><strong>天润融通</strong></td>
+  <td><span class="badge badge-red">不可用</span></td>
+  <td>需商务沟通</td>
+  <td>支持</td>
+  <td>支持</td>
+  <td>支持</td>
+  <td>需商务沟通</td>
+  <td>面向中大型企业；需商务洽谈</td>
+</tr>
+<tr>
+  <td><strong>网易七鱼</strong></td>
+  <td><span class="badge badge-red">不可用</span></td>
+  <td>—</td>
+  <td>支持</td>
+  <td>支持</td>
+  <td>支持</td>
+  <td>需申请</td>
+  <td>面向企业客户；需企业认证</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<h3>国际平台（可用于开发测试）</h3>
+
+<div class="table-wrap">
+<table>
+<thead>
+<tr>
+  <th>平台</th>
+  <th>个人可用?</th>
+  <th>免费额度</th>
+  <th>中国号码</th>
+  <th>备注</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><strong>Twilio</strong></td>
+  <td><span class="badge badge-green">可用</span></td>
+  <td>$15试用金</td>
+  <td>有中国号码（需资质）</td>
+  <td>开发者友好，有详细教程；中国号码仍需实名</td>
+</tr>
+<tr>
+  <td><strong>Voip.ms</strong></td>
+  <td><span class="badge badge-green">可用</span></td>
+  <td>预付费（$10起充）</td>
+  <td>无中国号码</td>
+  <td>个人即可注册；API完善；亚洲有节点；适合开发测试</td>
+</tr>
+<tr>
+  <td><strong>Telnyx</strong></td>
+  <td><span class="badge badge-green">可用</span></td>
+  <td>$10免费额度</td>
+  <td>无中国号码</td>
+  <td>开发者友好；比Twilio便宜</td>
+</tr>
+<tr>
+  <td><strong>IDT Express</strong></td>
+  <td><span class="badge badge-green">可用</span></td>
+  <td>$25免费试用</td>
+  <td>部分国家</td>
+  <td>运营商级SIP trunk；25美元免费额度</td>
+</tr>
+<tr>
+  <td><strong>LiveKit</strong></td>
+  <td><span class="badge badge-green">可用</span></td>
+  <td>免费tier</td>
+  <td>通过SIP桥接</td>
+  <td>开源框架+云；原生SIP支持（2025新增）</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+
+<!-- ==================== 合规 ==================== -->
+<section id="compliance">
+<h2>合规红线 — 为什么个人不行</h2>
+
+<p>电话外呼在中国大陆受严格监管，核心法规和要求如下：</p>
+
+<div class="table-wrap">
+<table>
+<thead>
+<tr>
+  <th>法规/要求</th>
+  <th>内容</th>
+  <th>影响</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><strong>工信部 B24 呼叫中心许可证</strong></td>
+  <td>全网需注册资本≥1000万；省内≥100万</td>
+  <td>个人和个体工商户无法申请</td>
+</tr>
+<tr>
+  <td><strong>运营商反电信诈骗要求</strong></td>
+  <td>每个语音号码必须实名到一个企业</td>
+  <td>号码不能登记在个人名下</td>
+</tr>
+<tr>
+  <td><strong>话术审核 & 备案</strong></td>
+  <td>外呼话术内容需提前审核并备案</td>
+  <td>个人无法完成此流程</td>
+</tr>
+<tr>
+  <td><strong>《个人信息保护法》</strong></td>
+  <td>外呼必须基于用户明确授权</td>
+  <td>需建立授权记录系统</td>
+</tr>
+<tr>
+  <td><strong>《消费者权益保护法实施条例》第24条</strong></td>
+  <td>未经消费者同意不得拨打商业性电话</td>
+  <td>违规面临行政处罚</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<div class="callout callout-warning">
+  <div class="callout-title">特别注意</div>
+  <p>即使找到灰色渠道绕过监管，风险极高：运营商封号（已有企业单日80%号码被封）、行政处罚、甚至刑事责任。<strong>口腔医院场景属于正规商业行为，务必走合规路线。</strong></p>
+</div>
+
+<h3>合法获取资质的路径</h3>
+<ol class="step-list">
+  <li><strong>注册有限责任公司</strong>（非自然人独资）— 费用 ~500-2000元，时间 1-2周。这是最基础的要求。</li>
+  <li><strong>完成企业实名认证</strong> — 在各云平台完成企业认证，通常 1-3 个工作日。</li>
+  <li><strong>提交话术审核</strong> — 准备口腔医院外呼话术（预约提醒、回访等），提交平台审核。</li>
+  <li><strong>购买号码 & 线路</strong> — 根据业务需求选择合适的号码类型。</li>
+</ol>
+</section>
+
+<!-- ==================== SIP ==================== -->
+<section id="sip">
+<h2>SIP 软电话方案</h2>
+
+<h3>演示可行性分析</h3>
+
+<p>用 SIP 软电话做演示在<strong>技术上完全可行</strong>，但在中国大陆场景有明确局限：</p>
+
+<div class="table-wrap">
+<table>
+<thead>
+<tr>
+  <th>方案</th>
+  <th>可行性</th>
+  <th>优点</th>
+  <th>缺点</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><strong>Voip.ms + 国际号码</strong></td>
+  <td><span class="badge badge-green">推荐用于Demo</span></td>
+  <td>个人即可注册；API完善；支持SIP/WebRTC；$10起充</td>
+  <td>国际号码，中国大陆来电显示为境外号；对方需接国际长途</td>
+</tr>
+<tr>
+  <td><strong>Twilio + SIP</strong></td>
+  <td><span class="badge badge-yellow">可用但贵</span></td>
+  <td>教程丰富；开发者社区大；$15试用</td>
+  <td>中国号码仍需资质；费用较高</td>
+</tr>
+<tr>
+  <td><strong>FreeSWITCH本地部署</strong></td>
+  <td><span class="badge badge-yellow">仅内部测试</span></td>
+  <td>完全开源免费；灵活配置；可对接AI</td>
+  <td>仅内部SIP-to-SIP通话；无法拨打PSTN真实电话</td>
+</tr>
+<tr>
+  <td><strong>3CX IP PBX</strong></td>
+  <td><span class="badge badge-yellow">仅内部测试</span></td>
+  <td>免费版可用；界面友好</td>
+  <td>同上，无PSTN接入</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<h3>FreeSWITCH + AI 对接架构</h3>
+
+<div class="arch-box">
+  <div class="arch-flow">
+    <span class="arch-node arch-node-user">SIP 软电话</span>
+    <span class="arch-arrow">→</span>
+    <span class="arch-node arch-node-tele">FreeSWITCH</span>
+    <span class="arch-arrow">→</span>
+    <span class="arch-node arch-node-ai">WebSocket / ESL</span>
+    <span class="arch-arrow">→</span>
+    <span class="arch-node arch-node-ai">AI Agent (Python)</span>
+  </div>
+  <p style="margin-top:12px;font-size:12px;color:var(--text-tertiary)">FreeSWITCH通过Event Socket或WebSocket将实时音频流转发给AI处理模块</p>
+</div>
+
+<p>FreeSWITCH 可通过以下方式对接 AI：</p>
+<ul>
+  <li><strong>mod_audio_fork</strong> — 将通话音频通过 WebSocket 实时转发给 AI 服务</li>
+  <li><strong>SignalWire AI Agent</strong> — FreeSWITCH 官方 SignalWire 提供的 AI 集成方案</li>
+  <li><strong>ESL (Event Socket Layer)</strong> — 通过编程接口控制通话并获取音频流</li>
+</ul>
+
+<h3>演示效果评估</h3>
+
+<div class="callout callout-warning">
+  <div class="callout-title">Demo 真实效果</div>
+  <p><strong>SIP-to-SIP 演示</strong>（两个软电话之间）：效果良好，延迟可控，但对方看到的是 SIP URI 而非真实电话号码，对于口腔医院客户演示缺乏说服力。</p>
+  <p><strong>国际号码拨打演示</strong>（通过 Voip.ms）：对方能看到来电号码，但显示为境外号码（如+1美国号），中国大陆用户可能不接或显示为骚扰电话。</p>
+</div>
+</section>
+
+<!-- ==================== 开源框架 ==================== -->
+<section id="opensource">
+<h2>开源语音 AI 框架对比</h2>
+
+<div class="table-wrap">
+<table>
+<thead>
+<tr>
+  <th>框架</th>
+  <th>活跃度</th>
+  <th>中文支持</th>
+  <th>电话集成</th>
+  <th>适合场景</th>
+  <th>推荐度</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><strong>LiveKit Agents</strong></td>
+  <td><span class="badge badge-green">v1.5 (2026)</span></td>
+  <td>通过ASR/TTS配置</td>
+  <td>原生SIP+电话号码（2025新增）</td>
+  <td>生产级部署；全栈方案</td>
+  <td><span class="badge badge-purple">最推荐</span></td>
+</tr>
+<tr>
+  <td><strong>Vocode</strong></td>
+  <td><span class="badge badge-green">活跃</span></td>
+  <td>支持中/日/韩多语言</td>
+  <td>通过Twilio/SIP集成</td>
+  <td>快速原型；Python友好</td>
+  <td><span class="badge badge-purple">推荐</span></td>
+</tr>
+<tr>
+  <td><strong>Pipecat (Daily)</strong></td>
+  <td><span class="badge badge-green">活跃</span></td>
+  <td>通过ASR/TTS配置</td>
+  <td>TWilio集成+Pipecat Cloud</td>
+  <td>多模态AI；灵活管线</td>
+  <td><span class="badge badge-yellow">可选</span></td>
+</tr>
+<tr>
+  <td><strong>FreeSWITCH + 自研</strong></td>
+  <td><span class="badge badge-yellow">成熟</span></td>
+  <td>完全自定义</td>
+  <td>原生SIP/PSTN</td>
+  <td>需要完全控制；底层集成</td>
+  <td><span class="badge badge-yellow">复杂场景</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<h3>LiveKit — 最推荐的选择</h3>
+
+<p><strong>为什么推荐 LiveKit：</strong></p>
+<ul>
+  <li><strong>2025年原生支持SIP和电话号码</strong>，不再需要 Twilio 中间层</li>
+  <li>开源 Python Agents 框架，与各种 LLM/ASR/TTS 无缝集成</li>
+  <li>支持 WebRTC（浏览器演示）和 Telephony（真实电话）两种模式</li>
+  <li>社区活跃，文档完善，迭代速度快（v1.0 → v1.5 仅一年）</li>
+  <li>可部署到 LiveKit Cloud（免费tier）或自建</li>
+</ul>
+
+<div class="code-block">
+# LiveKit 快速启动示例（Python）
+pip install livekit-agents livekit-plugins-openai livekit-plugins-deepgram
+
+# 支持的外呼模式：
+# 1. WebRTC → 浏览器内语音对话（无需电话线路）
+# 2. SIP → 通过SIP trunk连接真实电话
+# 3. Phone Numbers → LiveKit直接购买和管理电话号码
+</div>
+
+<h3>Vocode — 备选方案</h3>
+
+<p>Vocode 是一个成熟的开源 Python 框架，专门为语音 AI 设计：</p>
+<ul>
+  <li>明确支持<strong>中文、日文、韩文</strong>等多语言电话通道</li>
+  <li>支持 inbound 和 outbound 通话</li>
+  <li>可对接 Twilio、Vonage 等电话服务商</li>
+  <li>内置打断检测、话轮管理、静音处理等电话场景核心功能</li>
+  <li>开源核心免费，但电话/模型/SIP等运营成本另计</li>
+</ul>
+
+<h3>ASR/TTS 引擎选择（中文场景）</h3>
+
+<div class="table-wrap">
+<table>
+<thead>
+<tr>
+  <th>引擎</th>
+  <th>类型</th>
+  <th>中文质量</th>
+  <th>延迟</th>
+  <th>价格</th>
+  <th>备注</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><strong>阿里云 智能语音</strong></td>
+  <td>云端</td>
+  <td>优秀</td>
+  <td>低</td>
+  <td>~0.01元/次</td>
+  <td>需企业资质</td>
+</tr>
+<tr>
+  <td><strong>讯飞 语音</strong></td>
+  <td>云端</td>
+  <td>优秀</td>
+  <td>低</td>
+  <td>免费额度+按量</td>
+  <td>个人可用基础ASR/TTS（非电话外呼）</td>
+</tr>
+<tr>
+  <td><strong>Deepgram</strong></td>
+  <td>云端</td>
+  <td>良好</td>
+  <td>极低</td>
+  <td>$0.0043/min</td>
+  <td>海外服务，中国访问可能不稳定</td>
+</tr>
+<tr>
+  <td><strong>Whisper (OpenAI)</strong></td>
+  <td>云端/本地</td>
+  <td>优秀</td>
+  <td>中</td>
+  <td>$0.006/min</td>
+  <td>非流式，延迟较高</td>
+</tr>
+<tr>
+  <td><strong>FunASR (阿里开源)</strong></td>
+  <td>本地部署</td>
+  <td>优秀</td>
+  <td>取决于硬件</td>
+  <td>免费</td>
+  <td>完全本地化，无合规问题</td>
+</tr>
+<tr>
+  <td><strong>Edge TTS</strong></td>
+  <td>免费云端</td>
+  <td>良好</td>
+  <td>低</td>
+  <td>免费</td>
+  <td>微软Edge浏览器TTS，非官方API</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+
+<!-- ==================== 推荐方案 ==================== -->
+<section id="recommend">
+<h2>推荐方案</h2>
+
+<div class="callout callout-success">
+  <div class="callout-title">推荐路径：分两阶段走</div>
+  <p><strong>阶段一（Day 1-3）</strong>：用开源框架 + WebRTC 搭建 AI 语音 Demo，展示对话能力</p>
+  <p><strong>阶段二（Week 2-4）</strong>：注册公司 + 对接合规电话线路，实现真实电话外呼/接听</p>
+</div>
+
+<h3>阶段一：快速 Demo（无需企业资质）</h3>
+
+<div class="arch-box">
+  <div class="arch-flow">
+    <span class="arch-node arch-node-user">浏览器 (WebRTC)</span>
+    <span class="arch-arrow">→</span>
+    <span class="arch-node arch-node-ai">LiveKit Server</span>
+    <span class="arch-arrow">→</span>
+    <span class="arch-node arch-node-ai">AI Agent (Python)</span>
+    <span class="arch-arrow">→</span>
+    <span class="arch-node arch-node-db">LLM + TTS + ASR</span>
+  </div>
+  <p style="margin-top:12px;font-size:12px;color:var(--text-tertiary)">用户通过浏览器直接与AI语音对话，无需电话线路</p>
+</div>
+
+<p><strong>具体技术栈：</strong></p>
+<ul>
+  <li><strong>语音AI框架</strong>：LiveKit Agents（首选）或 Vocode</li>
+  <li><strong>ASR（语音识别）</strong>：FunASR（本地部署，免费，中文优秀）或 讯飞基础版（个人可用）</li>
+  <li><strong>TTS（语音合成）</strong>：Edge TTS（免费）或 CosyVoice（阿里开源，本地部署）</li>
+  <li><strong>LLM（对话大脑）</strong>：OpenAI GPT-4o-mini / 通义千问 / 文心一言</li>
+  <li><strong>前端</strong>：LiveKit WebRTC SDK，浏览器直接通话</li>
+  <li><strong>部署</strong>：一台云服务器（2核4G即可）</li>
+</ul>
+
+<p><strong>这个Demo可以展示什么：</strong></p>
+<ul>
+  <li>AI接听"电话"（实际是浏览器语音通话）</li>
+  <li>AI主动"外呼"（实际是浏览器推送通知+语音通话）</li>
+  <li>口腔医院场景对话：预约、改约、问诊咨询、回访</li>
+  <li>打断检测、多轮对话、知识库回答</li>
+</ul>
+
+<h3>阶段二：真实电话（需企业资质）</h3>
+
+<ol class="step-list">
+  <li><strong>注册有限责任公司</strong>（非自然人独资） — 费用约500-2000元，1-2周</li>
+  <li><strong>完成阿里云/腾讯云企业实名认证</strong> — 1-3个工作日</li>
+  <li><strong>申请语音服务资质</strong> — 提交企业资质+话术审核，3-7个工作日</li>
+  <li><strong>购买电话号码和线路</strong> — 选择固话号或95/400号码</li>
+  <li><strong>对接AI语音能力</strong> — 用 LiveKit/Vocode + 云通信平台 SIP/API</li>
+  <li><strong>上线测试</strong> — 小规模外呼测试，验证话术合规</li>
+</ol>
+
+<div class="callout callout-recommend">
+  <div class="callout-title">阶段二平台选择建议</div>
+  <p><strong>首选：阿里云语音服务</strong> — 文档最完善，API最稳定，生态最好。价格约0.08-0.15元/分钟。</p>
+  <p><strong>备选：容联云通讯</strong> — 对个人转企业最友好，认证快，支持SIP trunk。</p>
+  <p><strong>讯飞作为语音引擎补充</strong> — 中文ASR/TTS质量最好，可以作为语音能力层，线路另接。</p>
+</div>
+</section>
+
+<!-- ==================== 时间线 ==================== -->
+<section id="timeline">
+<h2>执行时间线</h2>
+
+<div class="timeline">
+  <div class="timeline-item">
+    <div class="timeline-label">Day 1</div>
+    <div class="timeline-content">
+      <strong>搭建开发环境 + 跑通 LiveKit/Vocode Demo</strong><br>
+      安装 LiveKit Server + Agents SDK，配置 ASR/TTS/LLM，浏览器实现第一轮AI语音对话。目标：让AI说出"您好，这里是XX口腔医院"。
+    </div>
+  </div>
+  <div class="timeline-item">
+    <div class="timeline-label">Day 2-3</div>
+    <div class="timeline-content">
+      <strong>口腔医院业务逻辑 + 知识库</strong><br>
+      编写口腔医院场景 prompt（预约、改约、价格咨询等），接入知识库（常见问答），测试对话流畅度。
+    </div>
+  </div>
+  <div class="timeline-item">
+    <div class="timeline-label">Day 4-5</div>
+    <div class="timeline-content">
+      <strong>WebRTC Demo 前端</strong><br>
+      搭建简洁的电话拨打界面（模拟拨号盘+通话界面），用于给口腔医院负责人演示。
+    </div>
+  </div>
+  <div class="timeline-item">
+    <div class="timeline-label">Day 5-7</div>
+    <div class="timeline-content">
+      <strong>（可选）国际 SIP 号码测试</strong><br>
+      注册 Voip.ms，购买一个国际号码，通过 SIP trunk 接入 LiveKit/FreeSWITCH，测试真实的电话呼入/呼出。注意：对方看到的是境外号码。
+    </div>
+  </div>
+  <div class="timeline-item">
+    <div class="timeline-label">Week 2</div>
+    <div class="timeline-content">
+      <strong>注册公司 + 提交企业认证</strong><br>
+      找代办注册有限责任公司，拿到营业执照后完成阿里云/腾讯云企业实名认证。
+    </div>
+  </div>
+  <div class="timeline-item">
+    <div class="timeline-label">Week 3</div>
+    <div class="timeline-content">
+      <strong>申请语音服务资质 + 购买号码</strong><br>
+      提交话术审核（口腔医院预约提醒、回访等场景），购买电话号码。
+    </div>
+  </div>
+  <div class="timeline-item">
+    <div class="timeline-label">Week 4</div>
+    <div class="timeline-content">
+      <strong>对接真实电话线路 + 上线</strong><br>
+      将 LiveKit/Vocode 对接阿里云/容联云 SIP trunk，实现真实电话外呼/接听。开始小范围测试。
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ==================== 成本 ==================== -->
+<section id="cost">
+<h2>成本估算</h2>
+
+<h3>阶段一：Demo 阶段（Week 1）</h3>
+
+<div class="arch-box" style="text-align:left">
+  <div class="cost-row">
+    <span class="cost-label">云服务器（2核4G，按需）</span>
+    <span class="cost-value">~¥100/月</span>
+  </div>
+  <div class="cost-row">
+    <span class="cost-label">LLM API（通义千问/GPT-4o-mini）</span>
+    <span class="cost-value">~¥50/月</span>
+  </div>
+  <div class="cost-row">
+    <span class="cost-label">ASR/TTS（FunASR本地 + Edge TTS免费）</span>
+    <span class="cost-value">¥0</span>
+  </div>
+  <div class="cost-row">
+    <span class="cost-label">Voip.ms 国际号码测试（可选）</span>
+    <span class="cost-value">~¥70（$10充值）</span>
+  </div>
+  <div class="cost-row">
+    <span class="cost-label">注册公司（代办费用）</span>
+    <span class="cost-value">~¥500-2000</span>
+  </div>
+  <div class="cost-row">
+    <span class="cost-label"><strong>Demo 阶段合计</strong></span>
+    <span class="cost-value"><strong>¥150-250/月 + 注册¥500-2000</strong></span>
+  </div>
+</div>
+
+<h3>阶段二：正式部署（Month 2+）</h3>
+
+<div class="arch-box" style="text-align:left">
+  <div class="cost-row">
+    <span class="cost-label">电话线路月租</span>
+    <span class="cost-value">~¥50-200/月/号码</span>
+  </div>
+  <div class="cost-row">
+    <span class="cost-label">通话费（外呼+接听）</span>
+    <span class="cost-value">~¥0.08-0.15/分钟</span>
+  </div>
+  <div class="cost-row">
+    <span class="cost-label">LLM API</span>
+    <span class="cost-value">~¥100-500/月</span>
+  </div>
+  <div class="cost-row">
+    <span class="cost-label">ASR/TTS（如用讯飞/阿里云商业版）</span>
+    <span class="cost-value">~¥100-300/月</span>
+  </div>
+  <div class="cost-row">
+    <span class="cost-label">云服务器</span>
+    <span class="cost-value">~¥100-300/月</span>
+  </div>
+  <div class="cost-row">
+    <span class="cost-label"><strong>正式运营月费（100通/天估算）</strong></span>
+    <span class="cost-value"><strong>~¥800-2000/月</strong></span>
+  </div>
+</div>
+
+<div class="callout callout-success">
+  <div class="callout-title">成本对比</div>
+  <p>一个人工客服月薪约 ¥4000-6000，AI 电话系统月运营成本约 ¥800-2000，且可 7×24 小时工作。按口腔医院场景（预约提醒、回访、咨询），<strong>预计 1-2 个月即可回本</strong>。</p>
+</div>
+</section>
+
+<div class="divider"></div>
+
+<section>
+<h2>附录：关键资源链接</h2>
+
+<h3>开源框架</h3>
+<ul>
+  <li><a href="https://github.com/livekit/agents" target="_blank">LiveKit Agents</a> — 最推荐的语音AI框架</li>
+  <li><a href="https://github.com/vocodedev/vocode-core" target="_blank">Vocode Core</a> — 成熟的开源语音AI平台</li>
+  <li><a href="https://github.com/pipecat-ai/pipecat" target="_blank">Pipecat</a> — Daily 出品的语音AI框架</li>
+  <li><a href="https://github.com/yzfly/awesome-voice-agents" target="_blank">awesome-voice-agents</a> — 语音AI资源合集（中文）</li>
+</ul>
+
+<h3>中国云通信平台</h3>
+<ul>
+  <li><a href="https://help.aliyun.com/zh/vms/" target="_blank">阿里云语音服务文档</a></li>
+  <li><a href="https://cloud.tencent.com/product/ccc" target="_blank">腾讯云联络中心(TCCC)</a></li>
+  <li><a href="https://www.xfyun.cn/service/telrobot-capability-midware" target="_blank">讯飞AI客服中间件</a></li>
+  <li><a href="https://console.yuntongxun.com/" target="_blank">容联云通讯</a></li>
+</ul>
+
+<h3>国际SIP/电话服务</h3>
+<ul>
+  <li><a href="https://voip.ms/" target="_blank">Voip.ms</a> — 个人友好的SIP服务商</li>
+  <li><a href="https://www.twilio.com/" target="_blank">Twilio</a> — 开发者生态最完善</li>
+  <li><a href="https://telnyx.com/" target="_blank">Telnyx</a> — Twilio 平价替代</li>
+</ul>
+
+<h3>中文ASR/TTS</h3>
+<ul>
+  <li><a href="https://github.com/alibaba-damo-academy/FunASR" target="_blank">FunASR</a> — 阿里开源语音识别（推荐本地部署）</li>
+  <li><a href="https://github.com/FunAudioLLM/CosyVoice" target="_blank">CosyVoice</a> — 阿里开源语音合成</li>
+</ul>
+</section>
+
+<div class="footer">
+  调研日期：2026-09-07 · 基于公开信息整理，具体政策以各平台最新官方说明为准
+</div>
+
+</div>
