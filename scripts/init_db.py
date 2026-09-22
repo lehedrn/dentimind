@@ -32,7 +32,7 @@ def add_test_data():
             {
                 "id": str(uuid.uuid4()),
                 "name": "张三",
-                "phone": "13950481396",
+                "phone": "your-phone-number",
                 "notes": "VIP客户，定期洗牙"
             },
             {

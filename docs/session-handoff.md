@@ -171,11 +171,11 @@
 
 ```bash
 # 阿里云CCC
-CCC_INSTANCE_ID=demo-1767693362317534
+CCC_INSTANCE_ID=your-ccc-instance-id
 ALIYUN_ACCESS_KEY_ID=your-access-key-id
 ALIYUN_ACCESS_KEY_SECRET=your-access-key-secret
 CCC_CALLER_NUMBER=66905712367967212
-CCC_USER_ID=智天气@demo-1767693362317534
+CCC_USER_ID=智天气@your-ccc-instance-id
 CCC_DEVICE_ID=device
 CCC_REGION_ID=cn-shanghai
 

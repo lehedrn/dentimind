@@ -198,14 +198,30 @@
 
     <script>
         // ========== 配置 ==========
-        const CONFIG = {
-            instanceId: 'demo-1767693362317534',
+        let CONFIG = {
+            instanceId: '',
             regionId: 'cn-shanghai',
             ajaxPath: '/api/ccc-proxy',
             afterCallRule: 15,
             autoAnswerCall: 0,
             exportErrorOfApi: true,
         };
+
+        // 从后端加载配置
+        async function loadConfig() {
+            try {
+                const response = await fetch('/api/config');
+                const config = await response.json();
+                CONFIG.instanceId = config.ccc_instance_id || '';
+                CONFIG.regionId = config.ccc_region_id || 'cn-shanghai';
+                console.log('✓ 配置加载成功:', CONFIG);
+                return true;
+            } catch (error) {
+                console.error('✗ 配置加载失败:', error);
+                alert('配置加载失败，请检查后端服务是否启动');
+                return false;
+            }
+        }
 
         // ========== 状态管理 ==========
         let workbenchSdk = null;
@@ -703,7 +719,13 @@
         }
 
         // ========== 启动 ==========
-        window.onload = () => {
+        window.onload = async () => {
+            // 先加载配置
+            const configLoaded = await loadConfig();
+            if (!configLoaded) {
+                return;
+            }
+            // 配置加载成功后初始化SDK
             initSdk();
             loadCallRecords();
         };

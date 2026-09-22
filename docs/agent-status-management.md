@@ -94,7 +94,7 @@ GET /api/ccc/agent/status
   "success": true,
   "agent_status": "Ready",
   "is_online": true,
-  "user_id": "智天气@demo-1767693362317534",
+  "user_id": "智天气@your-ccc-instance-id",
   "device_id": "device"
 }
 ```
@@ -118,7 +118,7 @@ POST /api/ccc/agent/sign-in
 {
   "success": true,
   "message": "坐席签到成功",
-  "user_id": "智天气@demo-1767693362317534"
+  "user_id": "智天气@your-ccc-instance-id"
 }
 ```
 

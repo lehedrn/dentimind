@@ -21,7 +21,7 @@ def test_auto_save_call_record():
         print("=" * 60)
 
         # 模拟外呼的手机号
-        test_phone = "13950481396"
+        test_phone = "your-phone-number"
 
         # 步骤1：根据手机号查找客户
         print(f"\n[1/4] 查找客户 - phone: {test_phone}")

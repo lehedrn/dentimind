@@ -191,7 +191,7 @@
 # 创建客户
 curl -X POST http://localhost:8000/api/customers/ \
   -H "Content-Type: application/json" \
-  -d '{"name": "张三", "phone": "13950481396"}'
+  -d '{"name": "张三", "phone": "your-phone-number"}'
 
 # 查询客户列表
 curl http://localhost:8000/api/customers/

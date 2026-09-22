@@ -157,11 +157,11 @@ def check_config():
     print("  ⚠ CCC API 可能不直接支持查询路由配置")
     print("  📋 请在 CCC 控制台检查:")
     print("     1. 登录: https://ccc.console.aliyun.com/")
-    print("     2. 选择实例: demo-1767693362317534")
+    print("     2. 选择实例: your-ccc-instance-id")
     print("     3. 左侧菜单: 呼叫中心配置 → 呼入管理 → 呼入路由")
     print("     4. 检查是否有路由规则:")
     print("        - 绑定号码: 057123679672")
-    print("        - 目标技能组/坐席: 智天气@demo-1767693362317534")
+    print("        - 目标技能组/坐席: 智天气@your-ccc-instance-id")
     print()
 
     # Webhook 配置
@@ -169,7 +169,7 @@ def check_config():
     print("  ⚠ CCC API 可能不直接支持查询 Webhook 配置")
     print("  📋 请在 CCC 控制台检查:")
     print("     1. 登录: https://ccc.console.aliyun.com/")
-    print("     2. 选择实例: demo-1767693362317534")
+    print("     2. 选择实例: your-ccc-instance-id")
     print("     3. 左侧菜单: 设置 → Webhook 或 事件订阅")
     print("     4. 添加 Webhook:")
     print("        - 事件类型: 通话结束 (CallEnded)")

@@ -159,7 +159,7 @@ def main():
     print("=" * 80)
     print()
     print("1. 登录 CCC 控制台: https://ccc.console.aliyun.com/")
-    print("2. 选择实例: demo-1767693362317534")
+    print("2. 选择实例: your-ccc-instance-id")
     print("3. 配置呼入路由(绑定号码 057123679672)")
     print("4. 配置 Webhook(通话结束回调)")
     print()

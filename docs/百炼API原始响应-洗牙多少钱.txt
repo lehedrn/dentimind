@@ -12,7 +12,7 @@
   },
   "parameters": {
     "agent_options": {
-      "agent_id": "aid-66d367c6f194437b9a062f2d77afa371"
+      "agent_id": "your-bailian-app-id"
     }
   },
   "stream": true

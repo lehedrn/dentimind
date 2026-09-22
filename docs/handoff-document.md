@@ -140,16 +140,16 @@
 
 ```bash
 # 阿里云CCC
-CCC_INSTANCE_ID=demo-1767693362317534
+CCC_INSTANCE_ID=your-ccc-instance-id
 ALIYUN_ACCESS_KEY_ID=your-access-key-id
 ALIYUN_ACCESS_KEY_SECRET=your-access-key-secret
 CCC_CALLER_NUMBER=66905712367967212
-CCC_USER_ID=ztqkqAIAPI@demo-1767693362317534
+CCC_USER_ID=ztqkqAIAPI@your-ccc-instance-id
 CCC_DEVICE_ID=device
 CCC_REGION_ID=cn-shanghai
 
 # 阿里云百炼
-BAILIAN_APP_ID=aid-66d367c6f194437b9a062f2d77afa371
+BAILIAN_APP_ID=your-bailian-app-id
 DASHSCOPE_API_KEY=your-dashscope-api-key
 
 # 服务配置
@@ -265,7 +265,7 @@ DATABASE_URL=sqlite:///./dental_ai.db
 
 2. AI外呼完整流程
    - 打开 http://localhost:8000/outbound
-   - 输入手机号：13950481396
+   - 输入手机号：your-phone-number
    - 点击拨打
    - 验证通话记录自动保存
    - 验证录音播放

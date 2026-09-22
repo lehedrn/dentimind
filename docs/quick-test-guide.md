@@ -62,7 +62,7 @@
 
 1. 访问：http://localhost:8000/outbound
 2. **发起外呼：**
-   - 输入手机号：`13950481396`（张三，白名单号码）
+   - 输入手机号：`your-phone-number`（张三，白名单号码）
    - 点击"拨打"
    - 等待拨打结果
 3. **验证通话记录：**
@@ -96,7 +96,7 @@ curl -X POST http://localhost:8000/api/webhook/ccc/call-ended \
 ### 第六步：验证数据关联（2分钟）
 
 1. 访问：http://localhost:8000/customers
-2. 找到 "张三"（13950481396）
+2. 找到 "张三"（your-phone-number）
 3. 查看其通话记录
 
 ✅ **预期：** 显示张三的所有通话记录
@@ -127,7 +127,7 @@ curl -X POST http://localhost:8000/api/webhook/ccc/call-ended \
 ```
 
 ### 外呼失败？
-- 使用白名单号码：13950481396
+- 使用白名单号码：your-phone-number
 - 检查CCC配置
 
 ### AI回复很慢？
