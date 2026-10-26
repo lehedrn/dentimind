@@ -9,14 +9,20 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
 import requests
 import json
+import urllib3
 
-BASE_URL = "http://localhost:8000"
+# 默认 https（服务已启用 HTTPS）；可通过环境变量 TEST_BASE_URL 覆盖
+BASE_URL = os.getenv("TEST_BASE_URL", "https://localhost:8000")
+
+# 自签证书 → 跳过校验，并关掉 urllib3 的 InsecureRequestWarning
+requests_kwargs_common = {"verify": False}
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 def test_health():
     """测试健康检查"""
     print("\n[1/7] 测试健康检查...")
     try:
-        response = requests.get(f"{BASE_URL}/health")
+        response = requests.get(f"{BASE_URL}/health", verify=False)
         assert response.status_code == 200
         data = response.json()
         assert data["status"] == "ok"
@@ -36,21 +42,21 @@ def test_customers_crud():
             "name": "测试客户",
             "phone": "13900001111",
             "notes": "全流程测试客户"
-        })
+        }, verify=False)
         assert response.status_code == 201
         customer = response.json()
         customer_id = customer["id"]
         print(f"✓ 创建客户成功 - id: {customer_id}")
 
         # 2. 查询客户列表
-        response = requests.get(f"{BASE_URL}/api/customers/")
+        response = requests.get(f"{BASE_URL}/api/customers/", verify=False)
         assert response.status_code == 200
         customers = response.json()
         assert len(customers) > 0
         print(f"✓ 查询客户列表成功 - 共 {len(customers)} 条记录")
 
         # 3. 查询客户详情
-        response = requests.get(f"{BASE_URL}/api/customers/{customer_id}")
+        response = requests.get(f"{BASE_URL}/api/customers/{customer_id}", verify=False)
         assert response.status_code == 200
         customer_detail = response.json()
         assert customer_detail["name"] == "测试客户"
@@ -59,14 +65,14 @@ def test_customers_crud():
         # 4. 更新客户
         response = requests.put(f"{BASE_URL}/api/customers/{customer_id}", json={
             "notes": "已更新备注"
-        })
+        }, verify=False)
         assert response.status_code == 200
         updated_customer = response.json()
         assert updated_customer["notes"] == "已更新备注"
         print(f"✓ 更新客户成功")
 
         # 5. 删除客户
-        response = requests.delete(f"{BASE_URL}/api/customers/{customer_id}")
+        response = requests.delete(f"{BASE_URL}/api/customers/{customer_id}", verify=False)
         assert response.status_code == 200
         print(f"✓ 删除客户成功")
 
@@ -83,7 +89,7 @@ def test_chat_api():
     print("\n[3/7] 测试文本客服API...")
     try:
         # 1. 创建新会话（需要提供初始消息）
-        response = requests.post(f"{BASE_URL}/api/chat/new-session?message=你好", timeout=60)
+        response = requests.post(f"{BASE_URL}/api/chat/new-session?message=你好", timeout=60, verify=False)
         assert response.status_code == 200
         session_data = response.json()
         session_id = session_data["session_id"]
@@ -93,7 +99,7 @@ def test_chat_api():
         response = requests.post(f"{BASE_URL}/api/chat/message", json={
             "session_id": session_id,
             "message": "洗牙多少钱？"
-        }, timeout=60)
+        }, timeout=60, verify=False)
         assert response.status_code == 200
         chat_response = response.json()
         assert "reply" in chat_response
@@ -178,14 +184,14 @@ def test_webhook():
     try:
         # 测试通话结束回调
         response = requests.post(f"{BASE_URL}/api/webhook/ccc/call-ended", json={
-            "call_id": f"test-webhook-{int(requests.get(f'{BASE_URL}/health').elapsed.total_seconds() * 1000)}",
+            "call_id": f"test-webhook-{int(requests.get(f'{BASE_URL}/health', verify=False).elapsed.total_seconds() * 1000)}",
             "contact_id": "test-contact-webhook",
             "callee": "13800138003",
             "status": "answered",
             "duration": 60,
             "start_time": "1726370000000",
             "end_time": "1726370060000"
-        })
+        }, verify=False)
         assert response.status_code == 200
         data = response.json()
         assert data["success"] == True
@@ -214,7 +220,7 @@ def test_customer_call_records():
             return True
 
         # 查询客户通话记录
-        response = requests.get(f"{BASE_URL}/api/customers/{customer.id}/call-records")
+        response = requests.get(f"{BASE_URL}/api/customers/{customer.id}/call-records", verify=False)
         assert response.status_code == 200
         data = response.json()
         assert "records" in data
@@ -266,7 +272,7 @@ def main():
 
     # 检查服务是否运行
     try:
-        requests.get(f"{BASE_URL}/health", timeout=2)
+        requests.get(f"{BASE_URL}/health", timeout=2, verify=False)
     except:
         print("✗ 服务未运行，请先启动服务")
         return False
